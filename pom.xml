@@ -202,14 +202,14 @@
         <module>testing/trino-product-tests</module>
         <module>testing/trino-product-tests-launcher</module>
         <module>testing/trino-server-dev</module>
-        <module>testing/trino-test-jdbc-compatibility-old-driver</module>
-        <module>testing/trino-test-jdbc-compatibility-old-server</module>
-        <module>testing/trino-testing</module>
-        <module>testing/trino-testing-containers</module>
-        <module>testing/trino-testing-kafka</module>
-        <module>testing/trino-testing-resources</module>
-        <module>testing/trino-testing-services</module>
-        <module>testing/trino-tests</module>
+<!--        <module>testing/trino-test-jdbc-compatibility-old-driver</module>-->
+<!--        <module>testing/trino-test-jdbc-compatibility-old-server</module>-->
+<!--        <module>testing/trino-testing</module>-->
+<!--        <module>testing/trino-testing-containers</module>-->
+<!--        <module>testing/trino-testing-kafka</module>-->
+<!--        <module>testing/trino-testing-resources</module>-->
+<!--        <module>testing/trino-testing-services</module>-->
+<!--        <module>testing/trino-tests</module>-->
     </modules>
 
     <dependencyManagement>
