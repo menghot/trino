@@ -75,9 +75,8 @@ public final class JdbcCatalogStore
         List<String> disabledCatalogs = firstNonNull(config.getDisabledCatalogs(), ImmutableList.of());
 
         List<JdbcStoredCatalog> dbCatalogs = catalogsJdbi.withHandle(handle -> {
-            handle.execute("CREATE TABLE IF NOT EXISTS \"catalogs\" (\"name\" VARCHAR PRIMARY KEY, \"properties\" TEXT)");
 
-            return handle.createQuery("SELECT \"name\", \"properties\" FROM \"catalogs\"")
+            return handle.createQuery("SELECT name, properties FROM catalogs")
                     .mapToBean(JdbcStoredCatalog.class)
                     .list();
         });
@@ -135,7 +134,7 @@ public final class JdbcCatalogStore
         JdbcStoredCatalog jdbcCatalog = new JdbcStoredCatalog(catalogName, stringProperties);
 
         catalogsJdbi.withHandle(handle -> {
-            handle.createUpdate("INSERT INTO \"catalogs\" (\"name\",\"properties\") VALUES (:name, :properties)")
+            handle.createUpdate("INSERT INTO catalogs (name,properties) VALUES (:name, :properties)")
                     .bind("name", catalogName)
                     .bind("properties", stringProperties)
                     .execute();
@@ -151,7 +150,7 @@ public final class JdbcCatalogStore
         checkModifiable();
 
         catalogsJdbi.withHandle(handle -> {
-            handle.createUpdate("DELETE FROM \"catalogs\" WHERE name = :name")
+            handle.createUpdate("DELETE FROM catalogs WHERE name = :name")
                     .bind("name", catalogName)
                     .execute();
             return null;
