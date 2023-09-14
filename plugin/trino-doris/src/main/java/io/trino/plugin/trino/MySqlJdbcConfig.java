@@ -28,7 +28,7 @@ import static com.mysql.cj.conf.ConnectionUrlParser.parseConnectionString;
 public class MySqlJdbcConfig
         extends BaseJdbcConfig
 {
-    @AssertTrue(message = "Invalid JDBC URL for MySQL connector")
+    @AssertTrue(message = "Invalid JDBC URL for doris connector")
     public boolean isUrlValid()
     {
         try {
