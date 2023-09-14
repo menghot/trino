@@ -44,8 +44,8 @@ import static org.testcontainers.containers.PostgreSQLContainer.POSTGRESQL_PORT;
 public class TestingPostgreSqlServer
         implements Closeable
 {
-    private static final String USER = "test";
-    private static final String PASSWORD = "test";
+    private static final String USER = "postgres";
+    private static final String PASSWORD = "thinker";
     private static final String DATABASE = "tpch";
 
     private static final String LOG_PREFIX_REGEXP = "^([-:0-9. ]+UTC \\[[0-9]+\\] )";
@@ -74,7 +74,7 @@ public class TestingPostgreSqlServer
         if (shouldExposeFixedPorts) {
             exposeFixedPorts(dockerContainer);
         }
-        dockerContainer.start();
+        //dockerContainer.start();
 
         execute("CREATE SCHEMA tpch");
     }
@@ -156,7 +156,7 @@ public class TestingPostgreSqlServer
 
     public String getJdbcUrl()
     {
-        return format("jdbc:postgresql://%s:%s/%s", dockerContainer.getHost(), dockerContainer.getMappedPort(POSTGRESQL_PORT), DATABASE);
+        return format("jdbc:postgresql://%s:%s/%s", "10.194.188.93", "5432", DATABASE);
     }
 
     @Override
