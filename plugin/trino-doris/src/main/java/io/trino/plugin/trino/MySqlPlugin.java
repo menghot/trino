@@ -20,6 +20,6 @@ public class MySqlPlugin
 {
     public MySqlPlugin()
     {
-        super("trino", new MySqlClientModule());
+        super("doris", new MySqlClientModule());
     }
 }
