@@ -152,11 +152,11 @@
         </artifact>
     </artifactSet>
 
-    <artifactSet to="plugin/doris">
-        <artifact id="${project.groupId}:trino-doris:zip:${project.version}">
-            <unpack />
-        </artifact>
-    </artifactSet>
+<!--    <artifactSet to="plugin/doris">-->
+<!--        <artifact id="${project.groupId}:trino-doris:zip:${project.version}">-->
+<!--            <unpack />-->
+<!--        </artifact>-->
+<!--    </artifactSet>-->
 
     <artifactSet to="plugin/oracle">
         <artifact id="${project.groupId}:trino-oracle:zip:${project.version}">
@@ -176,11 +176,11 @@
         </artifact>
     </artifactSet>
 
-    <artifactSet to="plugin/gaussdb">
-        <artifact id="${project.groupId}:trino-gaussdb:zip:${project.version}">
-            <unpack />
-        </artifact>
-    </artifactSet>
+<!--    <artifactSet to="plugin/gaussdb">-->
+<!--        <artifact id="${project.groupId}:trino-gaussdb:zip:${project.version}">-->
+<!--            <unpack />-->
+<!--        </artifact>-->
+<!--    </artifactSet>-->
 
     <artifactSet to="plugin/prometheus">
         <artifact id="${project.groupId}:trino-prometheus:zip:${project.version}">

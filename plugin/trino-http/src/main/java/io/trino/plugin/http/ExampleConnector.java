@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.trino.plugin.example;
+package io.trino.plugin.http;
 
 import com.google.inject.Inject;
 import io.airlift.bootstrap.LifeCycleManager;
@@ -23,7 +23,7 @@ import io.trino.spi.connector.ConnectorSplitManager;
 import io.trino.spi.connector.ConnectorTransactionHandle;
 import io.trino.spi.transaction.IsolationLevel;
 
-import static io.trino.plugin.example.ExampleTransactionHandle.INSTANCE;
+import static io.trino.plugin.http.ExampleTransactionHandle.INSTANCE;
 import static java.util.Objects.requireNonNull;
 
 public class ExampleConnector

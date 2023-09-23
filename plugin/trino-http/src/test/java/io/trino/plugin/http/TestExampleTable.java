@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.trino.plugin.example;
+package io.trino.plugin.http;
 
 import com.google.common.collect.ImmutableList;
 import io.trino.spi.connector.ColumnMetadata;
@@ -19,7 +19,6 @@ import org.testng.annotations.Test;
 
 import java.net.URI;
 
-import static io.trino.plugin.example.MetadataUtil.TABLE_CODEC;
 import static io.trino.spi.type.BigintType.BIGINT;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static org.testng.Assert.assertEquals;
@@ -41,8 +40,8 @@ public class TestExampleTable
     @Test
     public void testRoundTrip()
     {
-        String json = TABLE_CODEC.toJson(exampleTable);
-        ExampleTable exampleTableCopy = TABLE_CODEC.fromJson(json);
+        String json = MetadataUtil.TABLE_CODEC.toJson(exampleTable);
+        ExampleTable exampleTableCopy = MetadataUtil.TABLE_CODEC.fromJson(json);
 
         assertEquals(exampleTableCopy.getName(), exampleTable.getName());
         assertEquals(exampleTableCopy.getColumns(), exampleTable.getColumns());

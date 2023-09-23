@@ -27,7 +27,6 @@ import jakarta.inject.Inject;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.reflect.ColumnName;
 
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -75,7 +74,6 @@ public final class JdbcCatalogStore
         List<String> disabledCatalogs = firstNonNull(config.getDisabledCatalogs(), ImmutableList.of());
 
         List<JdbcStoredCatalog> dbCatalogs = catalogsJdbi.withHandle(handle -> {
-
             return handle.createQuery("SELECT name, properties FROM catalogs")
                     .mapToBean(JdbcStoredCatalog.class)
                     .list();

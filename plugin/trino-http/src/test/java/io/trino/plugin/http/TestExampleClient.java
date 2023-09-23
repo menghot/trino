@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.trino.plugin.example;
+package io.trino.plugin.http;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -21,7 +21,6 @@ import org.testng.annotations.Test;
 import java.net.URI;
 import java.net.URL;
 
-import static io.trino.plugin.example.MetadataUtil.CATALOG_CODEC;
 import static io.trino.spi.type.BigintType.BIGINT;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static org.testng.Assert.assertEquals;
@@ -36,7 +35,7 @@ public class TestExampleClient
         URL metadataUrl = Resources.getResource(TestExampleClient.class, "/example-data/example-metadata.json");
         assertNotNull(metadataUrl, "metadataUrl is null");
         URI metadata = metadataUrl.toURI();
-        ExampleClient client = new ExampleClient(new ExampleConfig().setMetadata(metadata), CATALOG_CODEC);
+        ExampleClient client = new ExampleClient(new ExampleConfig().setMetadata(metadata), MetadataUtil.CATALOG_CODEC);
         assertEquals(client.getSchemaNames(), ImmutableSet.of("example", "tpch"));
         assertEquals(client.getTableNames("example"), ImmutableSet.of("numbers"));
         assertEquals(client.getTableNames("tpch"), ImmutableSet.of("orders", "lineitem"));

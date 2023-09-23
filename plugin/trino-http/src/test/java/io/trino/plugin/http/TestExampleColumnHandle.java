@@ -11,12 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.trino.plugin.example;
+package io.trino.plugin.http;
 
 import io.airlift.testing.EquivalenceTester;
 import org.testng.annotations.Test;
 
-import static io.trino.plugin.example.MetadataUtil.COLUMN_CODEC;
 import static io.trino.spi.type.BigintType.BIGINT;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static org.testng.Assert.assertEquals;
@@ -28,8 +27,8 @@ public class TestExampleColumnHandle
     @Test
     public void testJsonRoundTrip()
     {
-        String json = COLUMN_CODEC.toJson(columnHandle);
-        ExampleColumnHandle copy = COLUMN_CODEC.fromJson(json);
+        String json = MetadataUtil.COLUMN_CODEC.toJson(columnHandle);
+        ExampleColumnHandle copy = MetadataUtil.COLUMN_CODEC.fromJson(json);
         assertEquals(copy, columnHandle);
     }
 

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.trino.plugin.example;
+package io.trino.plugin.http;
 
 import com.google.inject.Injector;
 import io.airlift.bootstrap.Bootstrap;
@@ -32,7 +32,7 @@ public class ExampleConnectorFactory
     @Override
     public String getName()
     {
-        return "example_http";
+        return "http";
     }
 
     @Override

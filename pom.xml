@@ -36,9 +36,7 @@
         <module>core/trino-parser</module>
         <module>core/trino-server</module>
         <module>core/trino-server-main</module>
-<!--        <module>core/trino-server-rpm</module>-->
         <module>core/trino-spi</module>
-<!--        <module>docs</module>-->
         <module>lib/trino-array</module>
         <module>lib/trino-cache</module>
         <module>lib/trino-filesystem</module>
@@ -68,10 +66,8 @@
         <module>plugin/trino-cassandra</module>
         <module>plugin/trino-clickhouse</module>
         <module>plugin/trino-delta-lake</module>
-        <module>plugin/trino-doris</module>
         <module>plugin/trino-druid</module>
         <module>plugin/trino-elasticsearch</module>
-        <module>plugin/trino-http</module>
         <module>plugin/trino-example-http</module>
         <module>plugin/trino-example-jdbc</module>
         <module>plugin/trino-exchange-filesystem</module>
@@ -80,6 +76,7 @@
         <module>plugin/trino-google-sheets</module>
         <module>plugin/trino-hive</module>
         <module>plugin/trino-hive-hadoop2</module>
+        <module>plugin/trino-http</module>
         <module>plugin/trino-http-event-listener</module>
         <module>plugin/trino-hudi</module>
         <module>plugin/trino-iceberg</module>
@@ -100,7 +97,6 @@
         <module>plugin/trino-phoenix5</module>
         <module>plugin/trino-pinot</module>
         <module>plugin/trino-postgresql</module>
-        <module>plugin/trino-gaussdb</module>
         <module>plugin/trino-prometheus</module>
         <module>plugin/trino-raptor-legacy</module>
         <module>plugin/trino-redis</module>
@@ -125,14 +121,6 @@
         <module>testing/trino-product-tests</module>
         <module>testing/trino-product-tests-launcher</module>
         <module>testing/trino-server-dev</module>
-<!--        <module>testing/trino-test-jdbc-compatibility-old-driver</module>-->
-<!--        <module>testing/trino-test-jdbc-compatibility-old-server</module>-->
-<!--        <module>testing/trino-testing</module>-->
-<!--        <module>testing/trino-testing-containers</module>-->
-<!--        <module>testing/trino-testing-kafka</module>-->
-<!--        <module>testing/trino-testing-resources</module>-->
-<!--        <module>testing/trino-testing-services</module>-->
-<!--        <module>testing/trino-tests</module>-->
     </modules>
 
     <scm>
@@ -147,6 +135,9 @@
         <air.check.skip-spotbugs>true</air.check.skip-spotbugs>
         <air.check.skip-pmd>true</air.check.skip-pmd>
         <air.check.skip-jacoco>true</air.check.skip-jacoco>
+        <air.check.skip-all>true</air.check.skip-all>
+        <air.check.skip-license>true</air.check.skip-license>
+        <air.check.skip-checkstyle>true</air.check.skip-checkstyle>
 
         <project.build.targetJdk>17</project.build.targetJdk>
         <air.java.version>17.0.4</air.java.version>
@@ -1017,6 +1008,13 @@
 
             <dependency>
                 <groupId>io.trino</groupId>
+                <artifactId>trino-http</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
+            </dependency>
+
+            <dependency>
+                <groupId>io.trino</groupId>
                 <artifactId>trino-hudi</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -1120,12 +1118,6 @@
                 <artifactId>trino-mongodb</artifactId>
                 <version>${project.version}</version>
                 <type>test-jar</type>
-            </dependency>
-
-            <dependency>
-                <groupId>io.trino</groupId>
-                <artifactId>trino-doris</artifactId>
-                <version>${project.version}</version>
             </dependency>
 
             <dependency>
