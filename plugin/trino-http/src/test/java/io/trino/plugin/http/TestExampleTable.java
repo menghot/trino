@@ -24,25 +24,28 @@ import static io.trino.spi.type.BigintType.BIGINT;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static org.testng.Assert.assertEquals;
 
-public class TestHttpTable {
-    private final HttpTable httpTable = new HttpTable("tableName",
-            ImmutableList.of(new HttpColumn("a", createUnboundedVarcharType()), new HttpColumn("b", BIGINT)),
+public class TestExampleTable
+{
+    private final ExampleTable exampleTable = new ExampleTable("tableName",
+            ImmutableList.of(new ExampleColumn("a", createUnboundedVarcharType()), new ExampleColumn("b", BIGINT)),
             ImmutableList.of(URI.create("file://table-1.json"), URI.create("file://table-2.json")));
 
     @Test
-    public void testColumnMetadata() {
-        assertEquals(httpTable.getColumnsMetadata(), ImmutableList.of(
+    public void testColumnMetadata()
+    {
+        assertEquals(exampleTable.getColumnsMetadata(), ImmutableList.of(
                 new ColumnMetadata("a", createUnboundedVarcharType()),
                 new ColumnMetadata("b", BIGINT)));
     }
 
     @Test
-    public void testRoundTrip() {
-        String json = TABLE_CODEC.toJson(httpTable);
-        HttpTable httpTableCopy = TABLE_CODEC.fromJson(json);
+    public void testRoundTrip()
+    {
+        String json = TABLE_CODEC.toJson(exampleTable);
+        ExampleTable exampleTableCopy = TABLE_CODEC.fromJson(json);
 
-        assertEquals(httpTableCopy.getName(), httpTable.getName());
-        assertEquals(httpTableCopy.getColumns(), httpTable.getColumns());
-        assertEquals(httpTableCopy.getSources(), httpTable.getSources());
+        assertEquals(exampleTableCopy.getName(), exampleTable.getName());
+        assertEquals(exampleTableCopy.getColumns(), exampleTable.getColumns());
+        assertEquals(exampleTableCopy.getSources(), exampleTable.getSources());
     }
 }

@@ -21,27 +21,30 @@ import static io.trino.spi.type.BigintType.BIGINT;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static org.testng.Assert.assertEquals;
 
-public class TestHttpColumnHandle {
-    private final HttpColumnHandle columnHandle = new HttpColumnHandle("columnName", createUnboundedVarcharType(), 0);
+public class TestExampleColumnHandle
+{
+    private final ExampleColumnHandle columnHandle = new ExampleColumnHandle("columnName", createUnboundedVarcharType(), 0);
 
     @Test
-    public void testJsonRoundTrip() {
+    public void testJsonRoundTrip()
+    {
         String json = COLUMN_CODEC.toJson(columnHandle);
-        HttpColumnHandle copy = COLUMN_CODEC.fromJson(json);
+        ExampleColumnHandle copy = COLUMN_CODEC.fromJson(json);
         assertEquals(copy, columnHandle);
     }
 
     @Test
-    public void testEquivalence() {
+    public void testEquivalence()
+    {
         EquivalenceTester.equivalenceTester()
                 .addEquivalentGroup(
-                        new HttpColumnHandle("columnName", createUnboundedVarcharType(), 0),
-                        new HttpColumnHandle("columnName", BIGINT, 0),
-                        new HttpColumnHandle("columnName", createUnboundedVarcharType(), 1))
+                        new ExampleColumnHandle("columnName", createUnboundedVarcharType(), 0),
+                        new ExampleColumnHandle("columnName", BIGINT, 0),
+                        new ExampleColumnHandle("columnName", createUnboundedVarcharType(), 1))
                 .addEquivalentGroup(
-                        new HttpColumnHandle("columnNameX", createUnboundedVarcharType(), 0),
-                        new HttpColumnHandle("columnNameX", BIGINT, 0),
-                        new HttpColumnHandle("columnNameX", createUnboundedVarcharType(), 1))
+                        new ExampleColumnHandle("columnNameX", createUnboundedVarcharType(), 0),
+                        new ExampleColumnHandle("columnNameX", BIGINT, 0),
+                        new ExampleColumnHandle("columnNameX", createUnboundedVarcharType(), 1))
                 .check();
     }
 }

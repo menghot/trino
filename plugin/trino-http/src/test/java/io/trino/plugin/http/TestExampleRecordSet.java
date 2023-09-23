@@ -29,37 +29,40 @@ import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
-public class TestHttpRecordSet {
-    private HttpServer exampleHttpServer;
+public class TestExampleRecordSet
+{
+    private ExampleHttpServer exampleHttpServer;
     private String dataUri;
 
     @Test
-    public void testGetColumnTypes() {
-        RecordSet recordSet = new HttpRecordSet(new HttpSplit(dataUri), ImmutableList.of(
-                new HttpColumnHandle("text", createUnboundedVarcharType(), 0),
-                new HttpColumnHandle("value", BIGINT, 1)));
+    public void testGetColumnTypes()
+    {
+        RecordSet recordSet = new ExampleRecordSet(new ExampleSplit(dataUri), ImmutableList.of(
+                new ExampleColumnHandle("text", createUnboundedVarcharType(), 0),
+                new ExampleColumnHandle("value", BIGINT, 1)));
         assertEquals(recordSet.getColumnTypes(), ImmutableList.of(createUnboundedVarcharType(), BIGINT));
 
-        recordSet = new HttpRecordSet(new HttpSplit(dataUri), ImmutableList.of(
-                new HttpColumnHandle("value", BIGINT, 1),
-                new HttpColumnHandle("text", createUnboundedVarcharType(), 0)));
+        recordSet = new ExampleRecordSet(new ExampleSplit(dataUri), ImmutableList.of(
+                new ExampleColumnHandle("value", BIGINT, 1),
+                new ExampleColumnHandle("text", createUnboundedVarcharType(), 0)));
         assertEquals(recordSet.getColumnTypes(), ImmutableList.of(BIGINT, createUnboundedVarcharType()));
 
-        recordSet = new HttpRecordSet(new HttpSplit(dataUri), ImmutableList.of(
-                new HttpColumnHandle("value", BIGINT, 1),
-                new HttpColumnHandle("value", BIGINT, 1),
-                new HttpColumnHandle("text", createUnboundedVarcharType(), 0)));
+        recordSet = new ExampleRecordSet(new ExampleSplit(dataUri), ImmutableList.of(
+                new ExampleColumnHandle("value", BIGINT, 1),
+                new ExampleColumnHandle("value", BIGINT, 1),
+                new ExampleColumnHandle("text", createUnboundedVarcharType(), 0)));
         assertEquals(recordSet.getColumnTypes(), ImmutableList.of(BIGINT, BIGINT, createUnboundedVarcharType()));
 
-        recordSet = new HttpRecordSet(new HttpSplit(dataUri), ImmutableList.of());
+        recordSet = new ExampleRecordSet(new ExampleSplit(dataUri), ImmutableList.of());
         assertEquals(recordSet.getColumnTypes(), ImmutableList.of());
     }
 
     @Test
-    public void testCursorSimple() {
-        RecordSet recordSet = new HttpRecordSet(new HttpSplit(dataUri), ImmutableList.of(
-                new HttpColumnHandle("text", createUnboundedVarcharType(), 0),
-                new HttpColumnHandle("value", BIGINT, 1)));
+    public void testCursorSimple()
+    {
+        RecordSet recordSet = new ExampleRecordSet(new ExampleSplit(dataUri), ImmutableList.of(
+                new ExampleColumnHandle("text", createUnboundedVarcharType(), 0),
+                new ExampleColumnHandle("value", BIGINT, 1)));
         RecordCursor cursor = recordSet.cursor();
 
         assertEquals(cursor.getType(0), createUnboundedVarcharType());
@@ -79,11 +82,12 @@ public class TestHttpRecordSet {
     }
 
     @Test
-    public void testCursorMixedOrder() {
-        RecordSet recordSet = new HttpRecordSet(new HttpSplit(dataUri), ImmutableList.of(
-                new HttpColumnHandle("value", BIGINT, 1),
-                new HttpColumnHandle("value", BIGINT, 1),
-                new HttpColumnHandle("text", createUnboundedVarcharType(), 0)));
+    public void testCursorMixedOrder()
+    {
+        RecordSet recordSet = new ExampleRecordSet(new ExampleSplit(dataUri), ImmutableList.of(
+                new ExampleColumnHandle("value", BIGINT, 1),
+                new ExampleColumnHandle("value", BIGINT, 1),
+                new ExampleColumnHandle("text", createUnboundedVarcharType(), 0)));
         RecordCursor cursor = recordSet.cursor();
 
         Map<String, Long> data = new LinkedHashMap<>();
@@ -107,13 +111,15 @@ public class TestHttpRecordSet {
     //
 
     @BeforeClass
-    public void setUp() {
-        exampleHttpServer = new HttpServer();
+    public void setUp()
+    {
+        exampleHttpServer = new ExampleHttpServer();
         dataUri = exampleHttpServer.resolve("/example-data/numbers-2.csv").toString();
     }
 
     @AfterClass(alwaysRun = true)
-    public void tearDown() {
+    public void tearDown()
+    {
         if (exampleHttpServer != null) {
             exampleHttpServer.stop();
         }

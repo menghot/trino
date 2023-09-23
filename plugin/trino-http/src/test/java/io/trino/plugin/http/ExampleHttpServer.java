@@ -35,11 +35,13 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 
-public class HttpServer {
+public class ExampleHttpServer
+{
     private final LifeCycleManager lifeCycleManager;
     private final URI baseUri;
 
-    public HttpServer() {
+    public ExampleHttpServer()
+    {
         Bootstrap app = new Bootstrap(
                 new TestingNodeModule(),
                 new TestingHttpServerModule(),
@@ -53,30 +55,35 @@ public class HttpServer {
         baseUri = injector.getInstance(TestingHttpServer.class).getBaseUrl();
     }
 
-    public void stop() {
+    public void stop()
+    {
         lifeCycleManager.stop();
     }
 
-    public URI resolve(String s) {
+    public URI resolve(String s)
+    {
         return baseUri.resolve(s);
     }
 
     private static class ExampleHttpServerModule
-            implements Module {
+            implements Module
+    {
         @Override
-        public void configure(Binder binder) {
-            binder.bind(new TypeLiteral<Map<String, String>>() {
-            }).annotatedWith(TheServlet.class).toInstance(ImmutableMap.of());
+        public void configure(Binder binder)
+        {
+            binder.bind(new TypeLiteral<Map<String, String>>() {}).annotatedWith(TheServlet.class).toInstance(ImmutableMap.of());
             binder.bind(Servlet.class).annotatedWith(TheServlet.class).toInstance(new ExampleHttpServlet());
         }
     }
 
     private static class ExampleHttpServlet
-            extends HttpServlet {
+            extends HttpServlet
+    {
         @Override
         protected void doGet(HttpServletRequest request, HttpServletResponse response)
-                throws IOException {
-            URL dataUrl = Resources.getResource(TestHttpClient.class, request.getPathInfo());
+                throws IOException
+        {
+            URL dataUrl = Resources.getResource(TestExampleClient.class, request.getPathInfo());
             Resources.asByteSource(dataUrl).copyTo(response.getOutputStream());
         }
     }

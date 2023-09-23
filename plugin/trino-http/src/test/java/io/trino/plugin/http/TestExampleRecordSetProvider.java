@@ -31,17 +31,19 @@ import static io.trino.testing.TestingConnectorSession.SESSION;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-public class TestHttpRecordSetProvider {
-    private HttpServer exampleHttpServer;
+public class TestExampleRecordSetProvider
+{
+    private ExampleHttpServer exampleHttpServer;
     private String dataUri;
 
     @Test
-    public void testGetRecordSet() {
-        ConnectorTableHandle tableHandle = new HttpTableHandle("schema", "table");
-        HttpRecordSetProvider recordSetProvider = new HttpRecordSetProvider();
-        RecordSet recordSet = recordSetProvider.getRecordSet(HttpTransactionHandle.INSTANCE, SESSION, new HttpSplit(dataUri), tableHandle, ImmutableList.of(
-                new HttpColumnHandle("text", createUnboundedVarcharType(), 0),
-                new HttpColumnHandle("value", BIGINT, 1)));
+    public void testGetRecordSet()
+    {
+        ConnectorTableHandle tableHandle = new ExampleTableHandle("schema", "table");
+        ExampleRecordSetProvider recordSetProvider = new ExampleRecordSetProvider();
+        RecordSet recordSet = recordSetProvider.getRecordSet(ExampleTransactionHandle.INSTANCE, SESSION, new ExampleSplit(dataUri), tableHandle, ImmutableList.of(
+                new ExampleColumnHandle("text", createUnboundedVarcharType(), 0),
+                new ExampleColumnHandle("value", BIGINT, 1)));
         assertNotNull(recordSet, "recordSet is null");
 
         RecordCursor cursor = recordSet.cursor();
@@ -63,13 +65,15 @@ public class TestHttpRecordSetProvider {
     //
 
     @BeforeClass
-    public void setUp() {
-        exampleHttpServer = new HttpServer();
+    public void setUp()
+    {
+        exampleHttpServer = new ExampleHttpServer();
         dataUri = exampleHttpServer.resolve("/example-data/numbers-2.csv").toString();
     }
 
     @AfterClass(alwaysRun = true)
-    public void tearDown() {
+    public void tearDown()
+    {
         if (exampleHttpServer != null) {
             exampleHttpServer.stop();
         }

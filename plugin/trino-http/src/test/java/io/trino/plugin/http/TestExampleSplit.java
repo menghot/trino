@@ -21,37 +21,40 @@ import org.testng.annotations.Test;
 import static io.airlift.json.JsonCodec.jsonCodec;
 import static org.testng.Assert.assertEquals;
 
-public class TestHttpSplit {
-    private final HttpSplit split = new HttpSplit("http://127.0.0.1/test.file");
+public class TestExampleSplit
+{
+    private final ExampleSplit split = new ExampleSplit("http://127.0.0.1/test.file");
 
     @Test
-    public void testAddresses() {
+    public void testAddresses()
+    {
         // http split with default port
-        HttpSplit httpSplit = new HttpSplit("http://example.com/example");
+        ExampleSplit httpSplit = new ExampleSplit("http://example.com/example");
         assertEquals(httpSplit.getAddresses(), ImmutableList.of(HostAddress.fromString("example.com")));
         assertEquals(httpSplit.isRemotelyAccessible(), true);
 
         // http split with custom port
-        httpSplit = new HttpSplit("http://example.com:8080/example");
+        httpSplit = new ExampleSplit("http://example.com:8080/example");
         assertEquals(httpSplit.getAddresses(), ImmutableList.of(HostAddress.fromParts("example.com", 8080)));
         assertEquals(httpSplit.isRemotelyAccessible(), true);
 
         // http split with default port
-        HttpSplit httpsSplit = new HttpSplit("https://example.com/example");
+        ExampleSplit httpsSplit = new ExampleSplit("https://example.com/example");
         assertEquals(httpsSplit.getAddresses(), ImmutableList.of(HostAddress.fromString("example.com")));
         assertEquals(httpsSplit.isRemotelyAccessible(), true);
 
         // http split with custom port
-        httpsSplit = new HttpSplit("https://example.com:8443/example");
+        httpsSplit = new ExampleSplit("https://example.com:8443/example");
         assertEquals(httpsSplit.getAddresses(), ImmutableList.of(HostAddress.fromParts("example.com", 8443)));
         assertEquals(httpsSplit.isRemotelyAccessible(), true);
     }
 
     @Test
-    public void testJsonRoundTrip() {
-        JsonCodec<HttpSplit> codec = jsonCodec(HttpSplit.class);
+    public void testJsonRoundTrip()
+    {
+        JsonCodec<ExampleSplit> codec = jsonCodec(ExampleSplit.class);
         String json = codec.toJson(split);
-        HttpSplit copy = codec.fromJson(json);
+        ExampleSplit copy = codec.fromJson(json);
         assertEquals(copy.getUri(), split.getUri());
 
         assertEquals(copy.getAddresses(), ImmutableList.of(HostAddress.fromString("127.0.0.1")));

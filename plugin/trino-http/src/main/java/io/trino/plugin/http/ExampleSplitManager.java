@@ -14,7 +14,16 @@
 package io.trino.plugin.example;
 
 import com.google.inject.Inject;
-import io.trino.spi.connector.*;
+import io.trino.spi.connector.ConnectorSession;
+import io.trino.spi.connector.ConnectorSplit;
+import io.trino.spi.connector.ConnectorSplitManager;
+import io.trino.spi.connector.ConnectorSplitSource;
+import io.trino.spi.connector.ConnectorTableHandle;
+import io.trino.spi.connector.ConnectorTransactionHandle;
+import io.trino.spi.connector.Constraint;
+import io.trino.spi.connector.DynamicFilter;
+import io.trino.spi.connector.FixedSplitSource;
+import io.trino.spi.connector.TableNotFoundException;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -23,12 +32,14 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-public class HttpSplitManager
-        implements ConnectorSplitManager {
-    private final HttpClient exampleClient;
+public class ExampleSplitManager
+        implements ConnectorSplitManager
+{
+    private final ExampleClient exampleClient;
 
     @Inject
-    public HttpSplitManager(HttpClient exampleClient) {
+    public ExampleSplitManager(ExampleClient exampleClient)
+    {
         this.exampleClient = requireNonNull(exampleClient, "exampleClient is null");
     }
 
@@ -38,9 +49,10 @@ public class HttpSplitManager
             ConnectorSession session,
             ConnectorTableHandle connectorTableHandle,
             DynamicFilter dynamicFilter,
-            Constraint constraint) {
-        HttpTableHandle tableHandle = (HttpTableHandle) connectorTableHandle;
-        HttpTable table = exampleClient.getTable(tableHandle.getSchemaName(), tableHandle.getTableName());
+            Constraint constraint)
+    {
+        ExampleTableHandle tableHandle = (ExampleTableHandle) connectorTableHandle;
+        ExampleTable table = exampleClient.getTable(tableHandle.getSchemaName(), tableHandle.getTableName());
 
         // this can happen if table is removed during a query
         if (table == null) {
@@ -49,7 +61,7 @@ public class HttpSplitManager
 
         List<ConnectorSplit> splits = new ArrayList<>();
         for (URI uri : table.getSources()) {
-            splits.add(new HttpSplit(uri.toString()));
+            splits.add(new ExampleSplit(uri.toString()));
         }
         Collections.shuffle(splits);
 

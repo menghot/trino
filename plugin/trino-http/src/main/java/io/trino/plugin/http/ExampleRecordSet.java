@@ -26,36 +26,41 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-public class HttpRecordSet
-        implements RecordSet {
-    private final List<HttpColumnHandle> columnHandles;
+public class ExampleRecordSet
+        implements RecordSet
+{
+    private final List<ExampleColumnHandle> columnHandles;
     private final List<Type> columnTypes;
     private final ByteSource byteSource;
 
-    public HttpRecordSet(HttpSplit split, List<HttpColumnHandle> columnHandles) {
+    public ExampleRecordSet(ExampleSplit split, List<ExampleColumnHandle> columnHandles)
+    {
         requireNonNull(split, "split is null");
 
         this.columnHandles = requireNonNull(columnHandles, "columnHandles is null");
         ImmutableList.Builder<Type> types = ImmutableList.builder();
-        for (HttpColumnHandle column : columnHandles) {
+        for (ExampleColumnHandle column : columnHandles) {
             types.add(column.getColumnType());
         }
         this.columnTypes = types.build();
 
         try {
             byteSource = Resources.asByteSource(URI.create(split.getUri()).toURL());
-        } catch (MalformedURLException e) {
+        }
+        catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public List<Type> getColumnTypes() {
+    public List<Type> getColumnTypes()
+    {
         return columnTypes;
     }
 
     @Override
-    public RecordCursor cursor() {
-        return new HttpRecordCursor(columnHandles, byteSource);
+    public RecordCursor cursor()
+    {
+        return new ExampleRecordCursor(columnHandles, byteSource);
     }
 }

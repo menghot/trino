@@ -33,29 +33,35 @@ import static io.trino.spi.type.BigintType.BIGINT;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static io.trino.testing.TestingConnectorSession.SESSION;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 @Test(singleThreaded = true)
-public class TestHttpMetadata {
-    private static final HttpTableHandle NUMBERS_TABLE_HANDLE = new HttpTableHandle("example", "numbers");
-    private HttpMetadata metadata;
+public class TestExampleMetadata
+{
+    private static final ExampleTableHandle NUMBERS_TABLE_HANDLE = new ExampleTableHandle("example", "numbers");
+    private ExampleMetadata metadata;
 
     @BeforeMethod
     public void setUp()
-            throws Exception {
-        URL metadataUrl = Resources.getResource(TestHttpClient.class, "/example-data/example-metadata.json");
+            throws Exception
+    {
+        URL metadataUrl = Resources.getResource(TestExampleClient.class, "/example-data/example-metadata.json");
         assertNotNull(metadataUrl, "metadataUrl is null");
-        HttpClient client = new HttpClient(new HttpConfig().setMetadata(metadataUrl.toURI()), CATALOG_CODEC);
-        metadata = new HttpMetadata(client);
+        ExampleClient client = new ExampleClient(new ExampleConfig().setMetadata(metadataUrl.toURI()), CATALOG_CODEC);
+        metadata = new ExampleMetadata(client);
     }
 
     @Test
-    public void testListSchemaNames() {
+    public void testListSchemaNames()
+    {
         assertEquals(metadata.listSchemaNames(SESSION), ImmutableSet.of("example", "tpch"));
     }
 
     @Test
-    public void testGetTableHandle() {
+    public void testGetTableHandle()
+    {
         assertEquals(metadata.getTableHandle(SESSION, new SchemaTableName("example", "numbers")), NUMBERS_TABLE_HANDLE);
         assertNull(metadata.getTableHandle(SESSION, new SchemaTableName("example", "unknown")));
         assertNull(metadata.getTableHandle(SESSION, new SchemaTableName("unknown", "numbers")));
@@ -63,23 +69,25 @@ public class TestHttpMetadata {
     }
 
     @Test
-    public void testGetColumnHandles() {
+    public void testGetColumnHandles()
+    {
         // known table
         assertEquals(metadata.getColumnHandles(SESSION, NUMBERS_TABLE_HANDLE), ImmutableMap.of(
-                "text", new HttpColumnHandle("text", createUnboundedVarcharType(), 0),
-                "value", new HttpColumnHandle("value", BIGINT, 1)));
+                "text", new ExampleColumnHandle("text", createUnboundedVarcharType(), 0),
+                "value", new ExampleColumnHandle("value", BIGINT, 1)));
 
         // unknown table
-        assertThatThrownBy(() -> metadata.getColumnHandles(SESSION, new HttpTableHandle("unknown", "unknown")))
+        assertThatThrownBy(() -> metadata.getColumnHandles(SESSION, new ExampleTableHandle("unknown", "unknown")))
                 .isInstanceOf(TableNotFoundException.class)
                 .hasMessage("Table 'unknown.unknown' not found");
-        assertThatThrownBy(() -> metadata.getColumnHandles(SESSION, new HttpTableHandle("example", "unknown")))
+        assertThatThrownBy(() -> metadata.getColumnHandles(SESSION, new ExampleTableHandle("example", "unknown")))
                 .isInstanceOf(TableNotFoundException.class)
                 .hasMessage("Table 'example.unknown' not found");
     }
 
     @Test
-    public void getTableMetadata() {
+    public void getTableMetadata()
+    {
         // known table
         ConnectorTableMetadata tableMetadata = metadata.getTableMetadata(SESSION, NUMBERS_TABLE_HANDLE);
         assertEquals(tableMetadata.getTable(), new SchemaTableName("example", "numbers"));
@@ -88,13 +96,14 @@ public class TestHttpMetadata {
                 new ColumnMetadata("value", BIGINT)));
 
         // unknown tables should produce null
-        assertNull(metadata.getTableMetadata(SESSION, new HttpTableHandle("unknown", "unknown")));
-        assertNull(metadata.getTableMetadata(SESSION, new HttpTableHandle("example", "unknown")));
-        assertNull(metadata.getTableMetadata(SESSION, new HttpTableHandle("unknown", "numbers")));
+        assertNull(metadata.getTableMetadata(SESSION, new ExampleTableHandle("unknown", "unknown")));
+        assertNull(metadata.getTableMetadata(SESSION, new ExampleTableHandle("example", "unknown")));
+        assertNull(metadata.getTableMetadata(SESSION, new ExampleTableHandle("unknown", "numbers")));
     }
 
     @Test
-    public void testListTables() {
+    public void testListTables()
+    {
         // all schemas
         assertEquals(ImmutableSet.copyOf(metadata.listTables(SESSION, Optional.empty())), ImmutableSet.of(
                 new SchemaTableName("example", "numbers"),
@@ -113,8 +122,9 @@ public class TestHttpMetadata {
     }
 
     @Test
-    public void getColumnMetadata() {
-        assertEquals(metadata.getColumnMetadata(SESSION, NUMBERS_TABLE_HANDLE, new HttpColumnHandle("text", createUnboundedVarcharType(), 0)),
+    public void getColumnMetadata()
+    {
+        assertEquals(metadata.getColumnMetadata(SESSION, NUMBERS_TABLE_HANDLE, new ExampleColumnHandle("text", createUnboundedVarcharType(), 0)),
                 new ColumnMetadata("text", createUnboundedVarcharType()));
 
         // example connector assumes that the table handle and column handle are
@@ -125,7 +135,8 @@ public class TestHttpMetadata {
     }
 
     @Test
-    public void testCreateTable() {
+    public void testCreateTable()
+    {
         assertThatThrownBy(() -> metadata.createTable(
                 SESSION,
                 new ConnectorTableMetadata(
@@ -137,7 +148,8 @@ public class TestHttpMetadata {
     }
 
     @Test(expectedExceptions = TrinoException.class)
-    public void testDropTableTable() {
+    public void testDropTableTable()
+    {
         metadata.dropTable(SESSION, NUMBERS_TABLE_HANDLE);
     }
 }

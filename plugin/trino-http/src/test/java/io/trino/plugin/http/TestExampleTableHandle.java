@@ -20,23 +20,26 @@ import org.testng.annotations.Test;
 import static io.airlift.json.JsonCodec.jsonCodec;
 import static org.testng.Assert.assertEquals;
 
-public class TestHttpTableHandle {
-    private final HttpTableHandle tableHandle = new HttpTableHandle("schemaName", "tableName");
+public class TestExampleTableHandle
+{
+    private final ExampleTableHandle tableHandle = new ExampleTableHandle("schemaName", "tableName");
 
     @Test
-    public void testJsonRoundTrip() {
-        JsonCodec<HttpTableHandle> codec = jsonCodec(HttpTableHandle.class);
+    public void testJsonRoundTrip()
+    {
+        JsonCodec<ExampleTableHandle> codec = jsonCodec(ExampleTableHandle.class);
         String json = codec.toJson(tableHandle);
-        HttpTableHandle copy = codec.fromJson(json);
+        ExampleTableHandle copy = codec.fromJson(json);
         assertEquals(copy, tableHandle);
     }
 
     @Test
-    public void testEquivalence() {
+    public void testEquivalence()
+    {
         EquivalenceTester.equivalenceTester()
-                .addEquivalentGroup(new HttpTableHandle("schema", "table"), new HttpTableHandle("schema", "table"))
-                .addEquivalentGroup(new HttpTableHandle("schemaX", "table"), new HttpTableHandle("schemaX", "table"))
-                .addEquivalentGroup(new HttpTableHandle("schema", "tableX"), new HttpTableHandle("schema", "tableX"))
+                .addEquivalentGroup(new ExampleTableHandle("schema", "table"), new ExampleTableHandle("schema", "table"))
+                .addEquivalentGroup(new ExampleTableHandle("schemaX", "table"), new ExampleTableHandle("schemaX", "table"))
+                .addEquivalentGroup(new ExampleTableHandle("schema", "tableX"), new ExampleTableHandle("schema", "tableX"))
                 .check();
     }
 }

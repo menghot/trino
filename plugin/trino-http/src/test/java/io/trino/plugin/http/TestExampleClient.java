@@ -27,22 +27,24 @@ import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-public class TestHttpClient {
+public class TestExampleClient
+{
     @Test
     public void testMetadata()
-            throws Exception {
-        URL metadataUrl = Resources.getResource(TestHttpClient.class, "/example-data/example-metadata.json");
+            throws Exception
+    {
+        URL metadataUrl = Resources.getResource(TestExampleClient.class, "/example-data/example-metadata.json");
         assertNotNull(metadataUrl, "metadataUrl is null");
         URI metadata = metadataUrl.toURI();
-        HttpClient client = new HttpClient(new HttpConfig().setMetadata(metadata), CATALOG_CODEC);
+        ExampleClient client = new ExampleClient(new ExampleConfig().setMetadata(metadata), CATALOG_CODEC);
         assertEquals(client.getSchemaNames(), ImmutableSet.of("example", "tpch"));
         assertEquals(client.getTableNames("example"), ImmutableSet.of("numbers"));
         assertEquals(client.getTableNames("tpch"), ImmutableSet.of("orders", "lineitem"));
 
-        HttpTable table = client.getTable("example", "numbers");
+        ExampleTable table = client.getTable("example", "numbers");
         assertNotNull(table, "table is null");
         assertEquals(table.getName(), "numbers");
-        assertEquals(table.getColumns(), ImmutableList.of(new HttpColumn("text", createUnboundedVarcharType()), new HttpColumn("value", BIGINT)));
+        assertEquals(table.getColumns(), ImmutableList.of(new ExampleColumn("text", createUnboundedVarcharType()), new ExampleColumn("value", BIGINT)));
         assertEquals(table.getSources(), ImmutableList.of(metadata.resolve("numbers-1.csv"), metadata.resolve("numbers-2.csv")));
     }
 }

@@ -21,17 +21,19 @@ import static io.airlift.configuration.ConfigBinder.configBinder;
 import static io.airlift.json.JsonCodec.listJsonCodec;
 import static io.airlift.json.JsonCodecBinder.jsonCodecBinder;
 
-public class HttpModule
-        implements Module {
+public class ExampleModule
+        implements Module
+{
     @Override
-    public void configure(Binder binder) {
-        binder.bind(HttpConnector.class).in(Scopes.SINGLETON);
-        binder.bind(HttpMetadata.class).in(Scopes.SINGLETON);
-        binder.bind(HttpClient.class).in(Scopes.SINGLETON);
-        binder.bind(HttpSplitManager.class).in(Scopes.SINGLETON);
-        binder.bind(HttpRecordSetProvider.class).in(Scopes.SINGLETON);
-        configBinder(binder).bindConfig(HttpConfig.class);
+    public void configure(Binder binder)
+    {
+        binder.bind(ExampleConnector.class).in(Scopes.SINGLETON);
+        binder.bind(ExampleMetadata.class).in(Scopes.SINGLETON);
+        binder.bind(ExampleClient.class).in(Scopes.SINGLETON);
+        binder.bind(ExampleSplitManager.class).in(Scopes.SINGLETON);
+        binder.bind(ExampleRecordSetProvider.class).in(Scopes.SINGLETON);
+        configBinder(binder).bindConfig(ExampleConfig.class);
 
-        jsonCodecBinder(binder).bindMapJsonCodec(String.class, listJsonCodec(HttpTable.class));
+        jsonCodecBinder(binder).bindMapJsonCodec(String.class, listJsonCodec(ExampleTable.class));
     }
 }

@@ -25,45 +25,51 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
 
-public class HttpTable {
+public class ExampleTable
+{
     private final String name;
-    private final List<HttpColumn> columns;
+    private final List<ExampleColumn> columns;
     private final List<ColumnMetadata> columnsMetadata;
     private final List<URI> sources;
 
     @JsonCreator
-    public HttpTable(
+    public ExampleTable(
             @JsonProperty("name") String name,
-            @JsonProperty("columns") List<HttpColumn> columns,
-            @JsonProperty("sources") List<URI> sources) {
+            @JsonProperty("columns") List<ExampleColumn> columns,
+            @JsonProperty("sources") List<URI> sources)
+    {
         checkArgument(!isNullOrEmpty(name), "name is null or is empty");
         this.name = requireNonNull(name, "name is null");
         this.columns = ImmutableList.copyOf(requireNonNull(columns, "columns is null"));
         this.sources = ImmutableList.copyOf(requireNonNull(sources, "sources is null"));
 
         ImmutableList.Builder<ColumnMetadata> columnsMetadata = ImmutableList.builder();
-        for (HttpColumn column : this.columns) {
+        for (ExampleColumn column : this.columns) {
             columnsMetadata.add(new ColumnMetadata(column.getName(), column.getType()));
         }
         this.columnsMetadata = columnsMetadata.build();
     }
 
     @JsonProperty
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
     @JsonProperty
-    public List<HttpColumn> getColumns() {
+    public List<ExampleColumn> getColumns()
+    {
         return columns;
     }
 
     @JsonProperty
-    public List<URI> getSources() {
+    public List<URI> getSources()
+    {
         return sources;
     }
 
-    public List<ColumnMetadata> getColumnsMetadata() {
+    public List<ColumnMetadata> getColumnsMetadata()
+    {
         return columnsMetadata;
     }
 }

@@ -19,20 +19,25 @@ import org.testng.annotations.Test;
 import java.net.URI;
 import java.util.Map;
 
-import static io.airlift.configuration.testing.ConfigAssertions.*;
+import static io.airlift.configuration.testing.ConfigAssertions.assertFullMapping;
+import static io.airlift.configuration.testing.ConfigAssertions.assertRecordedDefaults;
+import static io.airlift.configuration.testing.ConfigAssertions.recordDefaults;
 
-public class TestHttpConfig {
+public class TestExampleConfig
+{
     @Test
-    public void testDefaults() {
-        assertRecordedDefaults(recordDefaults(HttpConfig.class)
+    public void testDefaults()
+    {
+        assertRecordedDefaults(recordDefaults(ExampleConfig.class)
                 .setMetadata(null));
     }
 
     @Test
-    public void testExplicitPropertyMappings() {
+    public void testExplicitPropertyMappings()
+    {
         Map<String, String> properties = ImmutableMap.of("metadata-uri", "file://test.json");
 
-        HttpConfig expected = new HttpConfig()
+        ExampleConfig expected = new ExampleConfig()
                 .setMetadata(URI.create("file://test.json"));
 
         assertFullMapping(properties, expected);

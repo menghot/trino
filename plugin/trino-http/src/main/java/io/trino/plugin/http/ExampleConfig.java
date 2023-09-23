@@ -13,9 +13,25 @@
  */
 package io.trino.plugin.example;
 
-import io.trino.spi.connector.ConnectorTransactionHandle;
+import io.airlift.configuration.Config;
+import jakarta.validation.constraints.NotNull;
 
-public enum HttpTransactionHandle
-        implements ConnectorTransactionHandle {
-    INSTANCE
+import java.net.URI;
+
+public class ExampleConfig
+{
+    private URI metadata;
+
+    @NotNull
+    public URI getMetadata()
+    {
+        return metadata;
+    }
+
+    @Config("metadata-uri")
+    public ExampleConfig setMetadata(URI metadata)
+    {
+        this.metadata = metadata;
+        return this;
+    }
 }

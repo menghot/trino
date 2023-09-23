@@ -12,10 +12,7 @@
                     "type": "BIGINT"
                 }
             ],
-            "sources": [
-                "numbers-1.csv",
-                "numbers-2.csv"
-            ]
+            "sources": [ "numbers-1.csv", "numbers-2.csv" ]
         }
     ],
     "tpch": [
@@ -59,10 +56,7 @@
                     "type": "VARCHAR"
                 }
             ],
-            "sources": [
-                "orders-1.csv",
-                "orders-2.csv"
-            ]
+            "sources": [ "orders-1.csv", "orders-2.csv" ]
         },
         {
             "name": "lineitem",
@@ -128,10 +122,7 @@
                     "type": "VARCHAR"
                 }
             ],
-            "sources": [
-                "lineitem-1.csv",
-                "lineitem-2.csv"
-            ]
+            "sources": [ "lineitem-1.csv", "lineitem-2.csv" ]
         }
     ]
 }

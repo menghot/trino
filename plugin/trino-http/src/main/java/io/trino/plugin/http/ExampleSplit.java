@@ -26,16 +26,18 @@ import static io.airlift.slice.SizeOf.estimatedSizeOf;
 import static io.airlift.slice.SizeOf.instanceSize;
 import static java.util.Objects.requireNonNull;
 
-public class HttpSplit
-        implements ConnectorSplit {
-    private static final int INSTANCE_SIZE = instanceSize(HttpSplit.class);
+public class ExampleSplit
+        implements ConnectorSplit
+{
+    private static final int INSTANCE_SIZE = instanceSize(ExampleSplit.class);
 
     private final String uri;
     private final boolean remotelyAccessible;
     private final List<HostAddress> addresses;
 
     @JsonCreator
-    public HttpSplit(@JsonProperty("uri") String uri) {
+    public ExampleSplit(@JsonProperty("uri") String uri)
+    {
         this.uri = requireNonNull(uri, "uri is null");
 
         remotelyAccessible = true;
@@ -43,28 +45,33 @@ public class HttpSplit
     }
 
     @JsonProperty
-    public String getUri() {
+    public String getUri()
+    {
         return uri;
     }
 
     @Override
-    public boolean isRemotelyAccessible() {
+    public boolean isRemotelyAccessible()
+    {
         // only http or https is remotely accessible
         return remotelyAccessible;
     }
 
     @Override
-    public List<HostAddress> getAddresses() {
+    public List<HostAddress> getAddresses()
+    {
         return addresses;
     }
 
     @Override
-    public Object getInfo() {
+    public Object getInfo()
+    {
         return this;
     }
 
     @Override
-    public long getRetainedSizeInBytes() {
+    public long getRetainedSizeInBytes()
+    {
         return INSTANCE_SIZE
                 + estimatedSizeOf(uri)
                 + estimatedSizeOf(addresses, HostAddress::getRetainedSizeInBytes);
