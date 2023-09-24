@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TrinoServer" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="io.trino.server.TrinoServer" />
+    <module name="trino-server-main" />
+    <option name="VM_PARAMETERS" value="-Dconfig=$PROJECT_DIR$/core/trino-server-main/etc/config.properties" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
