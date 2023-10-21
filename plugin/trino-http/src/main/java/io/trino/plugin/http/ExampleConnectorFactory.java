@@ -52,6 +52,10 @@ public class ExampleConnectorFactory
                 .setRequiredConfigurationProperties(requiredConfig)
                 .initialize();
 
+        ExampleClient exampleClient =  injector.getInstance(ExampleClient.class);
+        exampleClient.setCatalogName(catalogName);
+        exampleClient.setTypeManager(context.getTypeManager());
+
         return injector.getInstance(ExampleConnector.class);
     }
 }

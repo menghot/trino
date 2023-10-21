@@ -21,15 +21,24 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 import com.google.inject.Inject;
+import com.mongo.dtp.metadata.api.Column;
+import com.mongo.dtp.metadata.api.MetadataServiceClient;
+import com.mongo.dtp.metadata.api.Table;
+import feign.Feign;
+import feign.jackson.JacksonDecoder;
 import io.airlift.json.JsonCodec;
+import io.trino.spi.type.TypeManager;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.transformValues;
@@ -39,42 +48,77 @@ import static java.util.Objects.requireNonNull;
 
 public class ExampleClient
 {
+
+    private String catalogName;
+
+    public String getCatalogName()
+    {
+        return catalogName;
+    }
+
+    private TypeManager typeManager;
+
+    public TypeManager getTypeManager()
+    {
+        return typeManager;
+    }
+
+    public void setTypeManager(TypeManager typeManager)
+    {
+        this.typeManager = typeManager;
+    }
+
+    public void setCatalogName(String catalogName)
+    {
+        this.catalogName = catalogName;
+    }
+
     /**
      * SchemaName -> (TableName -> TableMetadata)
      */
     private final Supplier<Map<String, Map<String, ExampleTable>>> schemas;
+
+    private MetadataServiceClient metadataServiceClient;
 
     @Inject
     public ExampleClient(ExampleConfig config, JsonCodec<Map<String, List<ExampleTable>>> catalogCodec)
     {
         requireNonNull(catalogCodec, "catalogCodec is null");
         schemas = Suppliers.memoize(schemasSupplier(catalogCodec, config.getMetadata()));
+        metadataServiceClient = Feign.builder().decoder(new JacksonDecoder()).target(MetadataServiceClient.class, "http://127.0.0.1:8081");
     }
 
     public Set<String> getSchemaNames()
     {
-        return schemas.get().keySet();
+        return metadataServiceClient.getSchemas(catalogName).stream().map(schema -> schema.getName()).collect(Collectors.toSet());
     }
 
     public Set<String> getTableNames(String schema)
     {
         requireNonNull(schema, "schema is null");
-        Map<String, ExampleTable> tables = schemas.get().get(schema);
-        if (tables == null) {
-            return ImmutableSet.of();
-        }
-        return tables.keySet();
+        return metadataServiceClient.getTables(this.catalogName, schema).stream().map(t -> t.getName()).collect(Collectors.toSet());
     }
 
     public ExampleTable getTable(String schema, String tableName)
     {
-        requireNonNull(schema, "schema is null");
-        requireNonNull(tableName, "tableName is null");
-        Map<String, ExampleTable> tables = schemas.get().get(schema);
-        if (tables == null) {
-            return null;
+
+        Table table = metadataServiceClient.getTable(catalogName, schema, tableName);
+
+        List<ExampleColumn> columns = new ArrayList<>();
+        for (Column column : table.getColumns()) {
+            ExampleColumn exampleColumn = new ExampleColumn(column.getName(), typeManager.fromSqlType(column.getTypeName()));
+            columns.add(exampleColumn);
         }
-        return tables.get(tableName);
+
+        List<URI> sources = new ArrayList();
+        try {
+            sources.add(new URI(table.getProperties().get("http.url")));
+        }
+        catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        return new ExampleTable(tableName, columns, sources);
     }
 
     private static Supplier<Map<String, Map<String, ExampleTable>>> schemasSupplier(JsonCodec<Map<String, List<ExampleTable>>> catalogCodec, URI metadataUri)
@@ -89,9 +133,22 @@ public class ExampleClient
         };
     }
 
+    /**
+     * @param metadataUri
+     * @param catalogCodec
+     * @return key schema name
+     * value Map: key: table name
+     * value: ExampleTable
+     * @throws IOException
+     */
     private static Map<String, Map<String, ExampleTable>> lookupSchemas(URI metadataUri, JsonCodec<Map<String, List<ExampleTable>>> catalogCodec)
             throws IOException
     {
+
+        java.util.function.Supplier<MetadataServiceClient> supplier = () -> Feign.builder().decoder(new JacksonDecoder()).target(MetadataServiceClient.class, "http://127.0.0.1:8081");
+
+        supplier.get().getCatalogs().iterator().forEachRemaining(c -> System.out.println(c.getName()));
+
         URL result = metadataUri.toURL();
         String json = Resources.toString(result, UTF_8);
         Map<String, List<ExampleTable>> catalog = catalogCodec.fromJson(json);
