@@ -28,6 +28,7 @@ import io.trino.spi.connector.TableNotFoundException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -61,10 +62,10 @@ public class ExampleSplitManager
 
         List<ConnectorSplit> splits = new ArrayList<>();
         for (URI uri : table.getSources()) {
-            splits.add(new ExampleSplit(uri.toString()));
+            splits.add(new ExampleSplit(uri.toString(), new HashMap<>()));
         }
         Collections.shuffle(splits);
 
-        return new FixedSplitSource(splits);
+        return new DynamicFixedSplitSource(new FixedSplitSource(splits), dynamicFilter, splits, constraint);
     }
 }

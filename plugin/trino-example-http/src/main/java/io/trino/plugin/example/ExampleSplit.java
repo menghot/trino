@@ -37,12 +37,14 @@ public class ExampleSplit
     private final String uri;
     private final boolean remotelyAccessible;
     private final List<HostAddress> addresses;
+    private final Map<String, String> splitProperties;
 
     @JsonCreator
-    public ExampleSplit(@JsonProperty("uri") String uri)
-    {
+    public ExampleSplit(
+            @JsonProperty("uri") String uri,
+            @JsonProperty("splitProperties") Map<String, String> splitProperties) {
         this.uri = requireNonNull(uri, "uri is null");
-
+        this.splitProperties = splitProperties;
         remotelyAccessible = true;
         addresses = ImmutableList.of(HostAddress.fromUri(URI.create(uri)));
     }
@@ -53,28 +55,30 @@ public class ExampleSplit
         return uri;
     }
 
+    @JsonProperty
+    public Map<String, String> getSplitProperties() {
+        return splitProperties;
+    }
+
+
     @Override
-    public boolean isRemotelyAccessible()
-    {
+    public boolean isRemotelyAccessible() {
         // only http or https is remotely accessible
         return remotelyAccessible;
     }
 
     @Override
-    public List<HostAddress> getAddresses()
-    {
+    public List<HostAddress> getAddresses() {
         return addresses;
     }
 
     @Override
-    public Map<String, String> getSplitInfo()
-    {
+    public Map<String, String> getSplitInfo() {
         return ImmutableMap.of("addresses", addresses.stream().map(HostAddress::toString).collect(joining(",")), "remotelyAccessible", String.valueOf(remotelyAccessible));
     }
 
     @Override
-    public long getRetainedSizeInBytes()
-    {
+    public long getRetainedSizeInBytes() {
         return INSTANCE_SIZE
                 + estimatedSizeOf(uri)
                 + estimatedSizeOf(addresses, HostAddress::getRetainedSizeInBytes);
