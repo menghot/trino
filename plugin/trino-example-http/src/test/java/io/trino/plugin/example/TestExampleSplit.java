@@ -23,28 +23,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestExampleSplit
 {
-    private final ExampleSplit split = new ExampleSplit("http://127.0.0.1/test.file");
+    private final ExampleSplit split = new ExampleSplit("http://127.0.0.1/test.file", null);
 
     @Test
     public void testAddresses()
     {
         // http split with default port
-        ExampleSplit httpSplit = new ExampleSplit("http://example.com/example");
+        ExampleSplit httpSplit = new ExampleSplit("http://example.com/example", null);
         assertThat(httpSplit.getAddresses()).isEqualTo(ImmutableList.of(HostAddress.fromString("example.com")));
         assertThat(httpSplit.isRemotelyAccessible()).isEqualTo(true);
 
         // http split with custom port
-        httpSplit = new ExampleSplit("http://example.com:8080/example");
+        httpSplit = new ExampleSplit("http://example.com:8080/example", null);
         assertThat(httpSplit.getAddresses()).isEqualTo(ImmutableList.of(HostAddress.fromParts("example.com", 8080)));
         assertThat(httpSplit.isRemotelyAccessible()).isEqualTo(true);
 
         // http split with default port
-        ExampleSplit httpsSplit = new ExampleSplit("https://example.com/example");
+        ExampleSplit httpsSplit = new ExampleSplit("https://example.com/example", null);
         assertThat(httpsSplit.getAddresses()).isEqualTo(ImmutableList.of(HostAddress.fromString("example.com")));
         assertThat(httpsSplit.isRemotelyAccessible()).isEqualTo(true);
 
         // http split with custom port
-        httpsSplit = new ExampleSplit("https://example.com:8443/example");
+        httpsSplit = new ExampleSplit("https://example.com:8443/example", null);
         assertThat(httpsSplit.getAddresses()).isEqualTo(ImmutableList.of(HostAddress.fromParts("example.com", 8443)));
         assertThat(httpsSplit.isRemotelyAccessible()).isEqualTo(true);
     }
