@@ -50,9 +50,10 @@ public class TestExamplePlugin {
 
         ExampleHttpServer exampleHttpServer = new ExampleHttpServer();
         String dataUri = exampleHttpServer.resolve("/example-data/numbers-2.csv").toString();
+        System.out.println(dataUri);
 
         QueryRunner queryRunner = builder()
-                .addCoordinatorProperty("http-server.http.port", "8080")
+                .addCoordinatorProperty("http-server.http.port", "8082")
                 .setWorkerCount(2)
                 .build();
 

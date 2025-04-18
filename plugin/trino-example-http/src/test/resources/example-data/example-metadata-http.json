@@ -25,7 +25,7 @@
                 },
                 {
                     "name": "custkey",
-                    "type": "BIGINT"
+                    "type": "VARCHAR"
                 },
                 {
                     "name": "orderstatus",
@@ -33,7 +33,7 @@
                 },
                 {
                     "name": "totalprice",
-                    "type": "DOUBLE"
+                    "type": "VARCHAR"
                 },
                 {
                     "name": "orderdate",
@@ -49,29 +49,29 @@
                 },
                 {
                     "name": "shippriority",
-                    "type": "INTEGER"
+                    "type": "VARCHAR"
                 },
                 {
                     "name": "comment",
                     "type": "VARCHAR"
                 }
             ],
-            "sources": [ "orders-1.csv", "orders-2.csv" ]
+            "sources": [ "http://localhost:8083/example-data/orders-1.csv", "http://localhost:8083/example-data/orders-2.csv" ]
         },
         {
             "name": "lineitem",
             "columns": [
                 {
                     "name": "orderkey",
-                    "type": "BIGINT"
+                    "type": "INTEGER"
                 },
                 {
                     "name": "partkey",
-                    "type": "BIGINT"
+                    "type": "INTEGER"
                 },
                 {
                     "name": "suppkey",
-                    "type": "BIGINT"
+                    "type": "INTEGER"
                 },
                 {
                     "name": "linenumber",

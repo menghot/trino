@@ -78,6 +78,7 @@ public class TestExampleRecordSetProvider
     {
         exampleHttpServer = new ExampleHttpServer();
         dataUri = exampleHttpServer.resolve("/example-data/numbers-2.csv").toString();
+        System.out.println(dataUri);
     }
 
     @AfterAll
