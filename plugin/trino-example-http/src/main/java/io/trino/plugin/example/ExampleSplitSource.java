@@ -18,23 +18,23 @@ import io.trino.sql.planner.LayoutConstraintEvaluator;
 
 import static io.trino.sql.ir.Comparison.Operator.EQUAL;
 
-public class FilterAbleSplitsSource implements ConnectorSplitSource {
+public class ExampleSplitSource implements ConnectorSplitSource {
 
     private final FixedSplitSource source;
     private final DynamicFilter dynamicFilter;
     private final Constraint constraint;
     private final List<ConnectorSplit> splits;
 
-    public FilterAbleSplitsSource(
-            FixedSplitSource source,
+    public ExampleSplitSource(
             DynamicFilter dynamicFilter,
             List<ConnectorSplit> splits,
             Constraint constraint) {
 
-        this.source = source;
         this.dynamicFilter = dynamicFilter;
-        this.splits = splits;
         this.constraint = constraint;
+        this.splits = splits;
+        this.source = new FixedSplitSource(splits);
+
     }
 
     @Override
@@ -108,6 +108,7 @@ public class FilterAbleSplitsSource implements ConnectorSplitSource {
 
                         if (!evaluator.getArguments().stream().toList().isEmpty() &&
                                 evaluator.getArguments().stream().toList().getFirst() instanceof ExampleColumnHandle columnHandle) {
+
                             System.out.println(columnHandle.getColumnName());
 
                             Field ef = evaluator.getClass().getDeclaredFields()[3];
@@ -131,8 +132,8 @@ public class FilterAbleSplitsSource implements ConnectorSplitSource {
                                     }
                                 }
                             } else if (expression instanceof In in) {
-                                for (Expression ex : in.valueList()) {
-                                    if (ex instanceof Constant constant) {
+                                for (Expression exp : in.valueList()) {
+                                    if (exp instanceof Constant constant) {
                                         if (constant.value() instanceof Slice s) {
                                             System.out.println(s.toStringUtf8());
                                         }

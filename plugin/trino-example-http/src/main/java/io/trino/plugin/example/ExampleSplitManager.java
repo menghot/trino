@@ -22,7 +22,6 @@ import io.trino.spi.connector.ConnectorTableHandle;
 import io.trino.spi.connector.ConnectorTransactionHandle;
 import io.trino.spi.connector.Constraint;
 import io.trino.spi.connector.DynamicFilter;
-import io.trino.spi.connector.FixedSplitSource;
 import io.trino.spi.connector.TableNotFoundException;
 
 import java.net.URI;
@@ -63,6 +62,6 @@ public class ExampleSplitManager
         }
         Collections.shuffle(splits);
 
-        return new FilterAbleSplitsSource(new FixedSplitSource(splits), dynamicFilter, splits, constraint);
+        return new ExampleSplitSource(dynamicFilter, splits, constraint);
     }
 }
