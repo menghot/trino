@@ -34,13 +34,11 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 
 public class ExampleSplitManager
-        implements ConnectorSplitManager
-{
+        implements ConnectorSplitManager {
     private final ExampleClient exampleClient;
 
     @Inject
-    public ExampleSplitManager(ExampleClient exampleClient)
-    {
+    public ExampleSplitManager(ExampleClient exampleClient) {
         this.exampleClient = requireNonNull(exampleClient, "exampleClient is null");
     }
 
@@ -50,8 +48,7 @@ public class ExampleSplitManager
             ConnectorSession session,
             ConnectorTableHandle connectorTableHandle,
             DynamicFilter dynamicFilter,
-            Constraint constraint)
-    {
+            Constraint constraint) {
         ExampleTableHandle tableHandle = (ExampleTableHandle) connectorTableHandle;
         ExampleTable table = exampleClient.getTable(tableHandle.getSchemaName(), tableHandle.getTableName());
 
@@ -66,6 +63,6 @@ public class ExampleSplitManager
         }
         Collections.shuffle(splits);
 
-        return new DynamicFixedSplitSource(new FixedSplitSource(splits), dynamicFilter, splits, constraint);
+        return new FilterAbleSplitsSource(new FixedSplitSource(splits), dynamicFilter, splits, constraint);
     }
 }
