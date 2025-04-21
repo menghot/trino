@@ -19,11 +19,14 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.CountingInputStream;
 import io.airlift.slice.Slice;
 import io.airlift.slice.Slices;
+import io.trino.spi.block.Block;
+import io.trino.spi.block.SqlMap;
 import io.trino.spi.connector.RecordCursor;
-import io.trino.spi.type.Type;
+import io.trino.spi.type.*;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
 
@@ -31,7 +34,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static io.trino.spi.type.BigintType.BIGINT;
 import static io.trino.spi.type.BooleanType.BOOLEAN;
+import static io.trino.spi.type.DateType.DATE;
 import static io.trino.spi.type.DoubleType.DOUBLE;
+import static io.trino.spi.type.TimestampType.TIMESTAMP_MILLIS;
+import static io.trino.spi.type.VarbinaryType.VARBINARY;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -152,6 +158,41 @@ public class ExampleRecordCursor
         Type actual = getType(field);
         checkArgument(actual.equals(expected), "Expected field %s to be type %s but is %s", field, expected, actual);
     }
+
+//    private static Object getActualCursorValue(RecordCursor cursor, Type type, int field)
+//    {
+//        Object fieldFromCursor = getFieldFromCursor(cursor, type, field);
+//        if (fieldFromCursor == null) {
+//            return null;
+//        }
+//        if (isStructuralType(type)) {
+//            if (type instanceof ArrayType arrayType) {
+//                return toArrayValue((Block) fieldFromCursor, arrayType.getElementType());
+//            }
+//            if (type instanceof MapType mapType) {
+//                return toMapValue((SqlMap) fieldFromCursor, mapType.getKeyType(), mapType.getValueType());
+//            }
+//            if (type instanceof RowType) {
+//                return toRowValue((Block) fieldFromCursor, type.getTypeParameters());
+//            }
+//        }
+//        if (type instanceof DecimalType decimalType) {
+//            return new SqlDecimal((BigInteger) fieldFromCursor, decimalType.getPrecision(), decimalType.getScale());
+//        }
+//        if (type instanceof VarcharType) {
+//            return new String(((Slice) fieldFromCursor).getBytes(), UTF_8);
+//        }
+//        if (VARBINARY.equals(type)) {
+//            return new SqlVarbinary(((Slice) fieldFromCursor).getBytes());
+//        }
+//        if (DATE.equals(type)) {
+//            return new SqlDate(((Long) fieldFromCursor).intValue());
+//        }
+//        if (TIMESTAMP_MILLIS.equals(type)) {
+//            return SqlTimestamp.fromMillis(3, (long) fieldFromCursor);
+//        }
+//        return fieldFromCursor;
+//    }
 
     @Override
     public void close() {}

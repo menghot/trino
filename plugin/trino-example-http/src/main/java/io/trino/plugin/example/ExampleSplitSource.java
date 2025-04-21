@@ -75,7 +75,7 @@ public class ExampleSplitSource implements ConnectorSplitSource {
                                             sb.append("&").append(r.getSingleValue());
                                         }
                                     } else {
-                                        throw new RuntimeException("Doesn't support dynamic push-down for the column: " + columnHandle.getColumnName());
+                                        throw new RuntimeException("Does n't support dynamic push-down for the column: " + columnHandle.getColumnName());
                                     }
                                 });
 
