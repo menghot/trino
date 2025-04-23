@@ -7,8 +7,7 @@ import io.trino.spi.connector.DynamicFilter;
 import io.trino.spi.connector.FixedSplitSource;
 
 import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -20,10 +19,19 @@ import static io.trino.sql.ir.Comparison.Operator.EQUAL;
 
 public class ExampleSplitSource implements ConnectorSplitSource {
 
-    private final FixedSplitSource source;
+    private FixedSplitSource source;
     private final DynamicFilter dynamicFilter;
     private final Constraint constraint;
     private final List<ConnectorSplit> splits;
+    private final Map<String, String> splitInfos;
+
+    private final Set<String> internalColumns = Set.of(
+            ExampleInternalColumn.HTTP_URL.getName(),
+            ExampleInternalColumn.HTTP_HEADER.getName(),
+            ExampleInternalColumn.HTTP_BODY.getName(),
+            ExampleInternalColumn.PARAMS.getName()
+    );
+
 
     public ExampleSplitSource(
             DynamicFilter dynamicFilter,
@@ -33,54 +41,40 @@ public class ExampleSplitSource implements ConnectorSplitSource {
         this.dynamicFilter = dynamicFilter;
         this.constraint = constraint;
         this.splits = splits;
-        this.source = new FixedSplitSource(splits);
+        this.splitInfos = new HashMap<>();
 
     }
 
     @Override
     public CompletableFuture<ConnectorSplitBatch> getNextBatch(int maxSize) {
-        //
-        applyConstraint();
-
-        //
-        applyDynamicFilter();
+        if (source == null) {
+            // Extract split info from constraint and dynamic filter
+            applyConstraintPushDown();
+            applyDynamicFilterPushDown();
+            source = new FixedSplitSource(splits);
+        }
         return source.getNextBatch(maxSize);
     }
 
-    private void applyDynamicFilter() {
+    // Support dynamic filter for "$data_uri", only below example supported
+    // 1. "$data_uri" in (select path * from x)
+    // 2. "$data_uri" = (select path * from x )
+    private void applyDynamicFilterPushDown() {
         if (dynamicFilter != null && dynamicFilter.isAwaitable()) {
             try {
                 dynamicFilter.isBlocked().get();
-                System.out.println(splits);
+
                 if (dynamicFilter.getCurrentPredicate().getDomains().isPresent()) {
                     dynamicFilter.getCurrentPredicate().getDomains().get().forEach((handle, domain) -> {
-                        // Support dynamic filter push down.
-                        // __file_path (support more splits)
-                        // __http_params
-                        // __http_header
-                        // __http_body
-
-                        // Support http_params dynamic filter
                         if (handle instanceof ExampleColumnHandle columnHandle
-                                && columnHandle.getColumnName().equals("__http_params")) {
+                                && columnHandle.getColumnName().equals(ExampleInternalColumn.DATA_URI.getName())) {
 
-                            // Fill dynamic params to split
-                            splits.iterator().forEachRemaining(split -> {
-                                StringBuilder sb = new StringBuilder();
-                                domain.getValues().getRanges().getOrderedRanges().iterator().forEachRemaining(r -> {
-                                    if (r.isSingleValue()) {
-                                        if (sb.isEmpty()) {
-                                            sb.append(r.getSingleValue());
-                                        } else {
-                                            sb.append("&").append(r.getSingleValue());
-                                        }
-                                    } else {
-                                        throw new RuntimeException("Does n't support dynamic push-down for the column: " + columnHandle.getColumnName());
-                                    }
-                                });
-
-                                //
-                                split.getSplitInfo().putIfAbsent("http_params", sb.toString());
+                            domain.getValues().getRanges().getOrderedRanges().iterator().forEachRemaining(r -> {
+                                if (r.isSingleValue() && r.getSingleValue() instanceof Slice s) {
+                                    splits.add(new ExampleSplit(s.toStringUtf8(), splitInfos));
+                                } else {
+                                    throw new RuntimeException("$data_uri is not a single value or string value");
+                                }
                             });
                         }
                     });
@@ -92,14 +86,14 @@ public class ExampleSplitSource implements ConnectorSplitSource {
         }
     }
 
-    private void applyConstraint() {
+    // Support constraint filter push down for internal columns
+    // $data_uri
+    // $params
+    // $http_header
+    // $http_body
+    private void applyConstraintPushDown() {
         if (constraint != null && constraint.predicate().isPresent()) {
-            // Support constraint filter push down
-            // __file_path  (support more splits)
-            // __http_params
-            // __http_header
-            // __http_body
-
+            Map<String, String> splitInfos = new HashMap<>();
             try {
                 for (Field field : constraint.predicate().get().getClass().getDeclaredFields()) {
                     if ("arg$1".equals(field.getName())) {
@@ -109,33 +103,62 @@ public class ExampleSplitSource implements ConnectorSplitSource {
                         if (!evaluator.getArguments().stream().toList().isEmpty() &&
                                 evaluator.getArguments().stream().toList().getFirst() instanceof ExampleColumnHandle columnHandle) {
 
-                            System.out.println(columnHandle.getColumnName());
-
-                            Field ef = evaluator.getClass().getDeclaredFields()[3];
-                            ef.setAccessible(true);
-
-                            if (evaluator.getArguments().stream().toList().isEmpty()) {
-                                throw new RuntimeException("");
-                            }
-
-                            Expression expression = (Expression) ef.get(evaluator);
-                            if (expression instanceof Comparison comparison) {
-                                if (comparison.operator().equals(EQUAL)) {
-                                    if (comparison.left() instanceof Reference reference) {
-                                        System.out.println(reference.name());
-                                    }
-
-                                    if (comparison.right() instanceof Constant constant) {
-                                        if (constant.value() instanceof Slice s) {
-                                            System.out.println(s.toStringUtf8());
+                            if (internalColumns.contains(columnHandle.getColumnName())) {
+                                // for below internal columns, only support equals expression. e.g
+                                // "$params" = ''
+                                // "$http_header" = ''
+                                // "$http_body" = ''
+                                Field ef = evaluator.getClass().getDeclaredFields()[3];
+                                ef.setAccessible(true);
+                                Expression expression = (Expression) ef.get(evaluator);
+                                if (expression instanceof Comparison comparison) {
+                                    if (comparison.operator().equals(EQUAL)) {
+                                        if (comparison.right() instanceof Constant constant) {
+                                            if (constant.value() instanceof Slice s) {
+                                                splitInfos.putIfAbsent(columnHandle.getColumnName(), s.toStringUtf8());
+                                            } else {
+                                                throw new RuntimeException("FOR INTERNAL COLUMNS, STRING SUPPORTED ONLY");
+                                            }
+                                        } else {
+                                            throw new RuntimeException("FOR INTERNAL COLUMNS, Constant SUPPORTED ONLY");
                                         }
+                                    } else {
+                                        throw new RuntimeException("FOR INTERNAL COLUMNS, EQUAL SUPPORTED ONLY");
                                     }
+                                } else {
+                                    throw new RuntimeException("FOR INTERNAL COLUMNS, COMPARISON SUPPORTED ONLY");
                                 }
-                            } else if (expression instanceof In in) {
-                                for (Expression exp : in.valueList()) {
-                                    if (exp instanceof Constant constant) {
-                                        if (constant.value() instanceof Slice s) {
-                                            System.out.println(s.toStringUtf8());
+                            } else if (ExampleInternalColumn.DATA_URI.getName().equals(columnHandle.getColumnName())) {
+                                // Support constraint filter push down, support expressions:
+                                // "$data_uri" = '' or
+                                // "$data_uri" in ('','')
+                                Field ef = evaluator.getClass().getDeclaredFields()[3];
+                                ef.setAccessible(true);
+                                Expression expression = (Expression) ef.get(evaluator);
+                                if (expression instanceof Comparison comparison) {
+                                    if (comparison.operator().equals(EQUAL)) {
+                                        if (comparison.right() instanceof Constant constant) {
+                                            if (constant.value() instanceof Slice s) {
+                                                splits.add(new ExampleSplit(s.toStringUtf8(), splitInfos));
+                                            } else {
+                                                throw new RuntimeException("1");
+                                            }
+                                        } else {
+                                            throw new RuntimeException("2");
+                                        }
+                                    } else {
+                                        throw new RuntimeException("3");
+                                    }
+                                } else if (expression instanceof In in) {
+                                    for (Expression exp : in.valueList()) {
+                                        if (exp instanceof Constant constant) {
+                                            if (constant.value() instanceof Slice s) {
+                                                splits.add(new ExampleSplit(s.toStringUtf8(), splitInfos));
+                                            } else {
+                                                throw new RuntimeException("4");
+                                            }
+                                        } else {
+                                            throw new RuntimeException("5");
                                         }
                                     }
                                 }
@@ -164,3 +187,16 @@ public class ExampleSplitSource implements ConnectorSplitSource {
         return this.source.getTableExecuteSplitsInfo();
     }
 }
+
+
+// 1. apply $params from dynamic filter or constraint
+// 2. apply $location , http_header, http_body from dynamic filter or constraint, replace placeholders by $params
+// 3. access location to generate splits.  check if need to get multiple split from location. generate splits.
+
+// $location
+// $params
+// $http_header
+// $http_body
+
+// single value:   $http_header, $http_body, $params
+// single or multiple values:  $location

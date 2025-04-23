@@ -15,12 +15,9 @@ package io.trino.plugin.example;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import io.trino.spi.HostAddress;
 import io.trino.spi.connector.ConnectorSplit;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -35,18 +32,14 @@ public class ExampleSplit
     private static final int INSTANCE_SIZE = instanceSize(ExampleSplit.class);
 
     private final String uri;
-    private final boolean remotelyAccessible;
-    private final List<HostAddress> addresses;
-    private final Map<String, String> splitProperties;
+    private final Map<String, String> splitInfos;
 
     @JsonCreator
     public ExampleSplit(
             @JsonProperty("uri") String uri,
-            @JsonProperty("splitProperties") Map<String, String> splitProperties) {
+            @JsonProperty("splitProperties") Map<String, String> splitInfos) {
         this.uri = requireNonNull(uri, "uri is null");
-        this.splitProperties = splitProperties;
-        remotelyAccessible = true;
-        addresses = ImmutableList.of(HostAddress.fromUri(URI.create(uri)));
+        this.splitInfos = splitInfos;
     }
 
     @JsonProperty
@@ -56,31 +49,30 @@ public class ExampleSplit
     }
 
     @JsonProperty
-    public Map<String, String> getSplitProperties() {
-        return splitProperties;
+    public Map<String, String> getSplitInfos() {
+        return splitInfos;
     }
 
 
     @Override
     public boolean isRemotelyAccessible() {
         // only http or https is remotely accessible
-        return remotelyAccessible;
+        return true;
     }
 
     @Override
     public List<HostAddress> getAddresses() {
-        return addresses;
+        return List.of();
     }
 
     @Override
     public Map<String, String> getSplitInfo() {
-        return ImmutableMap.of("addresses", addresses.stream().map(HostAddress::toString).collect(joining(",")), "remotelyAccessible", String.valueOf(remotelyAccessible));
+        return splitInfos;
     }
 
     @Override
     public long getRetainedSizeInBytes() {
         return INSTANCE_SIZE
-                + estimatedSizeOf(uri)
-                + estimatedSizeOf(addresses, HostAddress::getRetainedSizeInBytes);
+                + estimatedSizeOf(uri);
     }
 }
