@@ -49,8 +49,8 @@ public class ExampleSplitSource implements ConnectorSplitSource {
     public CompletableFuture<ConnectorSplitBatch> getNextBatch(int maxSize) {
         if (source == null) {
             // Extract split info from constraint and dynamic filter
-            applyConstraintPushDown();
-            applyDynamicFilterPushDown();
+            applyInternalColumnsConstraintPushDown();
+            applyInternalColumnsDynamicFilterPushDown();
             source = new FixedSplitSource(splits);
         }
         return source.getNextBatch(maxSize);
@@ -59,7 +59,7 @@ public class ExampleSplitSource implements ConnectorSplitSource {
     // Support dynamic filter for "$data_uri", only below example supported
     // 1. "$data_uri" in (select path * from x)
     // 2. "$data_uri" = (select path * from x )
-    private void applyDynamicFilterPushDown() {
+    private void applyInternalColumnsDynamicFilterPushDown() {
         if (dynamicFilter != null && dynamicFilter.isAwaitable()) {
             try {
                 dynamicFilter.isBlocked().get();
@@ -91,7 +91,7 @@ public class ExampleSplitSource implements ConnectorSplitSource {
     // $params
     // $http_header
     // $http_body
-    private void applyConstraintPushDown() {
+    private void applyInternalColumnsConstraintPushDown() {
         if (constraint != null && constraint.predicate().isPresent()) {
             Map<String, String> splitInfos = new HashMap<>();
             try {
