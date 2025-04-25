@@ -46,7 +46,7 @@ public class TestExampleRecordSetProvider
     {
         ConnectorTableHandle tableHandle = new ExampleTableHandle("schema", "table");
         ExampleRecordSetProvider recordSetProvider = new ExampleRecordSetProvider();
-        RecordSet recordSet = recordSetProvider.getRecordSet(ExampleTransactionHandle.INSTANCE, SESSION, new ExampleSplit(dataUri), tableHandle, ImmutableList.of(
+        RecordSet recordSet = recordSetProvider.getRecordSet(ExampleTransactionHandle.INSTANCE, SESSION, new ExampleSplit(dataUri, null), tableHandle, ImmutableList.of(
                 new ExampleColumnHandle("text", createUnboundedVarcharType(), 0),
                 new ExampleColumnHandle("value", BIGINT, 1)));
         assertThat(recordSet)
@@ -78,6 +78,7 @@ public class TestExampleRecordSetProvider
     {
         exampleHttpServer = new ExampleHttpServer();
         dataUri = exampleHttpServer.resolve("/example-data/numbers-2.csv").toString();
+        System.out.println(dataUri);
     }
 
     @AfterAll

@@ -22,24 +22,22 @@ import io.trino.spi.connector.ConnectorTableHandle;
 import io.trino.spi.connector.ConnectorTransactionHandle;
 import io.trino.spi.connector.Constraint;
 import io.trino.spi.connector.DynamicFilter;
-import io.trino.spi.connector.FixedSplitSource;
 import io.trino.spi.connector.TableNotFoundException;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
 public class ExampleSplitManager
-        implements ConnectorSplitManager
-{
+        implements ConnectorSplitManager {
     private final ExampleClient exampleClient;
 
     @Inject
-    public ExampleSplitManager(ExampleClient exampleClient)
-    {
+    public ExampleSplitManager(ExampleClient exampleClient) {
         this.exampleClient = requireNonNull(exampleClient, "exampleClient is null");
     }
 
@@ -49,8 +47,7 @@ public class ExampleSplitManager
             ConnectorSession session,
             ConnectorTableHandle connectorTableHandle,
             DynamicFilter dynamicFilter,
-            Constraint constraint)
-    {
+            Constraint constraint) {
         ExampleTableHandle tableHandle = (ExampleTableHandle) connectorTableHandle;
         ExampleTable table = exampleClient.getTable(tableHandle.getSchemaName(), tableHandle.getTableName());
 
@@ -61,10 +58,10 @@ public class ExampleSplitManager
 
         List<ConnectorSplit> splits = new ArrayList<>();
         for (URI uri : table.getSources()) {
-            splits.add(new ExampleSplit(uri.toString()));
+            splits.add(new ExampleSplit(uri.toString(), new HashMap<>()));
         }
         Collections.shuffle(splits);
 
-        return new FixedSplitSource(splits);
+        return new ExampleSplitSource(dynamicFilter, splits, constraint);
     }
 }

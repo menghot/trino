@@ -18,21 +18,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import io.trino.spi.TrinoException;
-import io.trino.spi.connector.ColumnHandle;
-import io.trino.spi.connector.ColumnMetadata;
-import io.trino.spi.connector.ConnectorMetadata;
-import io.trino.spi.connector.ConnectorSession;
-import io.trino.spi.connector.ConnectorTableHandle;
-import io.trino.spi.connector.ConnectorTableMetadata;
-import io.trino.spi.connector.ConnectorTableVersion;
-import io.trino.spi.connector.SchemaTableName;
-import io.trino.spi.connector.SchemaTablePrefix;
-import io.trino.spi.connector.TableNotFoundException;
+import io.trino.spi.connector.*;
+import io.trino.spi.type.Type;
+import io.trino.spi.type.VarcharType;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.trino.spi.StandardErrorCode.NOT_SUPPORTED;
 import static java.util.Objects.requireNonNull;
@@ -85,6 +76,11 @@ public class ExampleMetadata
     }
 
     @Override
+    public Optional<ConstraintApplicationResult<ConnectorTableHandle>> applyFilter(ConnectorSession session, ConnectorTableHandle handle, Constraint constraint) {
+        return ConnectorMetadata.super.applyFilter(session, handle, constraint);
+    }
+
+    @Override
     public List<SchemaTableName> listTables(ConnectorSession session, Optional<String> optionalSchemaName)
     {
         Set<String> schemaNames = optionalSchemaName.map(ImmutableSet::of)
@@ -110,11 +106,15 @@ public class ExampleMetadata
         }
 
         ImmutableMap.Builder<String, ColumnHandle> columnHandles = ImmutableMap.builder();
-        int index = 0;
+        AtomicInteger index = new AtomicInteger();
         for (ColumnMetadata column : table.getColumnsMetadata()) {
-            columnHandles.put(column.getName(), new ExampleColumnHandle(column.getName(), column.getType(), index));
-            index++;
+            columnHandles.put(column.getName(), new ExampleColumnHandle(column.getName(), column.getType(), index.getAndIncrement()));
         }
+
+//        Arrays.stream(ExampleInternalColumn.values()).iterator().forEachRemaining(column-> {
+//            columnHandles.put(column.getColumnName(), new ExampleColumnHandle(column.getColumnName(), VarcharType.createUnboundedVarcharType(), index.getAndIncrement()));
+//        });
+
         return columnHandles.buildOrThrow();
     }
 
