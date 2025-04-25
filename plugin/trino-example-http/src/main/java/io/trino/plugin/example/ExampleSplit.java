@@ -24,7 +24,6 @@ import java.util.Map;
 import static io.airlift.slice.SizeOf.estimatedSizeOf;
 import static io.airlift.slice.SizeOf.instanceSize;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
 
 public class ExampleSplit
         implements ConnectorSplit
