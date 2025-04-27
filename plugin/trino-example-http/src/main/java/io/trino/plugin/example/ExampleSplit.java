@@ -31,14 +31,14 @@ public class ExampleSplit
     private static final int INSTANCE_SIZE = instanceSize(ExampleSplit.class);
 
     private final String uri;
-    private final Map<String, String> splitInfos;
+    private final Map<String, String> properties;
 
     @JsonCreator
     public ExampleSplit(
             @JsonProperty("uri") String uri,
-            @JsonProperty("splitProperties") Map<String, String> splitInfos) {
+            @JsonProperty("properties") Map<String, String> properties) {
         this.uri = requireNonNull(uri, "uri is null");
-        this.splitInfos = splitInfos;
+        this.properties = properties;
     }
 
     @JsonProperty
@@ -48,8 +48,8 @@ public class ExampleSplit
     }
 
     @JsonProperty
-    public Map<String, String> getSplitInfos() {
-        return splitInfos;
+    public Map<String, String> getProperties() {
+        return properties;
     }
 
 
@@ -66,7 +66,7 @@ public class ExampleSplit
 
     @Override
     public Map<String, String> getSplitInfo() {
-        return splitInfos;
+        return properties;
     }
 
     @Override

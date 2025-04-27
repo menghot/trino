@@ -60,10 +60,9 @@ public class ExampleSplitSource implements ConnectorSplitSource {
     // 1. "$data_uri" in (select path * from x)
     // 2. "$data_uri" = (select path * from x )
     private void applyInternalColumnsDynamicFilterPushDown() {
-        if (dynamicFilter != null && dynamicFilter.isAwaitable()) {
+        if (dynamicFilter != null) {
             try {
                 dynamicFilter.isBlocked().get();
-
                 if (dynamicFilter.getCurrentPredicate().getDomains().isPresent()) {
                     dynamicFilter.getCurrentPredicate().getDomains().get().forEach((handle, domain) -> {
                         if (handle instanceof ExampleColumnHandle columnHandle
@@ -100,70 +99,80 @@ public class ExampleSplitSource implements ConnectorSplitSource {
                         field.setAccessible(true);
                         LayoutConstraintEvaluator evaluator = (LayoutConstraintEvaluator) field.get(constraint.predicate().get());
 
-                        if (!evaluator.getArguments().stream().toList().isEmpty() &&
-                                evaluator.getArguments().stream().toList().getFirst() instanceof ExampleColumnHandle columnHandle) {
-
-                            if (internalColumns.contains(columnHandle.getColumnName())) {
-                                // for below internal columns, only support equals expression. e.g
-                                // "$params" = ''
-                                // "$http_header" = ''
-                                // "$http_body" = ''
-                                Field ef = evaluator.getClass().getDeclaredFields()[3];
-                                ef.setAccessible(true);
-                                Expression expression = (Expression) ef.get(evaluator);
-                                if (expression instanceof Comparison comparison) {
-                                    if (comparison.operator().equals(EQUAL)) {
-                                        if (comparison.right() instanceof Constant constant) {
-                                            if (constant.value() instanceof Slice s) {
-                                                splitInfos.putIfAbsent(columnHandle.getColumnName(), s.toStringUtf8());
+                        evaluator.getArguments().iterator().forEachRemaining(arg -> {
+                            if(arg instanceof ExampleColumnHandle columnHandle){
+                                if (internalColumns.contains(columnHandle.getColumnName())) {
+                                    // for below internal columns, only support equals expression. e.g
+                                    // "$params" = ''
+                                    // "$http_header" = ''
+                                    // "$http_body" = ''
+                                    Field ef = evaluator.getClass().getDeclaredFields()[3];
+                                    ef.setAccessible(true);
+                                    Expression expression = null;
+                                    try {
+                                        expression = (Expression) ef.get(evaluator);
+                                    } catch (IllegalAccessException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                    if (expression instanceof Comparison comparison) {
+                                        if (comparison.operator().equals(EQUAL)) {
+                                            if (comparison.right() instanceof Constant constant) {
+                                                if (constant.value() instanceof Slice s) {
+                                                    splitInfos.putIfAbsent(columnHandle.getColumnName(), s.toStringUtf8());
+                                                } else {
+                                                    throw new RuntimeException("FOR INTERNAL COLUMNS, STRING SUPPORTED ONLY");
+                                                }
                                             } else {
-                                                throw new RuntimeException("FOR INTERNAL COLUMNS, STRING SUPPORTED ONLY");
+                                                throw new RuntimeException("FOR INTERNAL COLUMNS, Constant SUPPORTED ONLY");
                                             }
                                         } else {
-                                            throw new RuntimeException("FOR INTERNAL COLUMNS, Constant SUPPORTED ONLY");
+                                            throw new RuntimeException("FOR INTERNAL COLUMNS, EQUAL SUPPORTED ONLY");
                                         }
                                     } else {
-                                        throw new RuntimeException("FOR INTERNAL COLUMNS, EQUAL SUPPORTED ONLY");
+                                        throw new RuntimeException("FOR INTERNAL COLUMNS, COMPARISON SUPPORTED ONLY");
                                     }
-                                } else {
-                                    throw new RuntimeException("FOR INTERNAL COLUMNS, COMPARISON SUPPORTED ONLY");
-                                }
-                            } else if (ExampleInternalColumn.DATA_URI.getName().equals(columnHandle.getColumnName())) {
-                                // Support constraint filter push down, support expressions:
-                                // "$data_uri" = '' or
-                                // "$data_uri" in ('','')
-                                Field ef = evaluator.getClass().getDeclaredFields()[3];
-                                ef.setAccessible(true);
-                                Expression expression = (Expression) ef.get(evaluator);
-                                if (expression instanceof Comparison comparison) {
-                                    if (comparison.operator().equals(EQUAL)) {
-                                        if (comparison.right() instanceof Constant constant) {
-                                            if (constant.value() instanceof Slice s) {
-                                                splits.add(new ExampleSplit(s.toStringUtf8(), splitInfos));
+                                } else if (ExampleInternalColumn.DATA_URI.getName().equals(columnHandle.getColumnName())) {
+                                    // Support constraint filter push down, support expressions:
+                                    // "$data_uri" = '' or
+                                    // "$data_uri" in ('','')
+                                    Field ef = evaluator.getClass().getDeclaredFields()[3];
+                                    ef.setAccessible(true);
+                                    Expression expression = null;
+                                    try {
+                                        expression = (Expression) ef.get(evaluator);
+                                    } catch (IllegalAccessException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                    if (expression instanceof Comparison comparison) {
+                                        if (comparison.operator().equals(EQUAL)) {
+                                            if (comparison.right() instanceof Constant constant) {
+                                                if (constant.value() instanceof Slice s) {
+                                                    splits.add(new ExampleSplit(s.toStringUtf8(), splitInfos));
+                                                } else {
+                                                    throw new RuntimeException("1");
+                                                }
                                             } else {
-                                                throw new RuntimeException("1");
+                                                throw new RuntimeException("2");
                                             }
                                         } else {
-                                            throw new RuntimeException("2");
+                                            throw new RuntimeException("3");
                                         }
-                                    } else {
-                                        throw new RuntimeException("3");
-                                    }
-                                } else if (expression instanceof In in) {
-                                    for (Expression exp : in.valueList()) {
-                                        if (exp instanceof Constant constant) {
-                                            if (constant.value() instanceof Slice s) {
-                                                splits.add(new ExampleSplit(s.toStringUtf8(), splitInfos));
+                                    } else if (expression instanceof In in) {
+                                        for (Expression exp : in.valueList()) {
+                                            if (exp instanceof Constant constant) {
+                                                if (constant.value() instanceof Slice s) {
+                                                    splits.add(new ExampleSplit(s.toStringUtf8(), splitInfos));
+                                                } else {
+                                                    throw new RuntimeException("4");
+                                                }
                                             } else {
-                                                throw new RuntimeException("4");
+                                                throw new RuntimeException("5");
                                             }
-                                        } else {
-                                            throw new RuntimeException("5");
                                         }
                                     }
                                 }
                             }
-                        }
+                        });
                     }
                 }
             } catch (IllegalAccessException e) {
