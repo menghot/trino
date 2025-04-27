@@ -47,8 +47,8 @@ public class TestExampleRecordSetProvider
         ConnectorTableHandle tableHandle = new ExampleTableHandle("schema", "table");
         ExampleRecordSetProvider recordSetProvider = new ExampleRecordSetProvider();
         RecordSet recordSet = recordSetProvider.getRecordSet(ExampleTransactionHandle.INSTANCE, SESSION, new ExampleSplit(dataUri, null), tableHandle, ImmutableList.of(
-                new ExampleColumnHandle("text", createUnboundedVarcharType(), 0),
-                new ExampleColumnHandle("value", BIGINT, 1)));
+                new ExampleColumnHandle("text", createUnboundedVarcharType(), 0, false),
+                new ExampleColumnHandle("value", BIGINT, 1, false)));
         assertThat(recordSet)
                 .describedAs("recordSet is null")
                 .isNotNull();

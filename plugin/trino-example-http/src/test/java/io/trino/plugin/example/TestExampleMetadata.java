@@ -76,8 +76,8 @@ public class TestExampleMetadata
     {
         // known table
         assertThat(metadata.getColumnHandles(SESSION, NUMBERS_TABLE_HANDLE)).isEqualTo(ImmutableMap.of(
-                "text", new ExampleColumnHandle("text", createUnboundedVarcharType(), 0),
-                "value", new ExampleColumnHandle("value", BIGINT, 1)));
+                "text", new ExampleColumnHandle("text", createUnboundedVarcharType(), 0, false),
+                "value", new ExampleColumnHandle("value", BIGINT, 1, false)));
 
         // unknown table
         assertThatThrownBy(() -> metadata.getColumnHandles(SESSION, new ExampleTableHandle("unknown", "unknown")))
@@ -127,7 +127,7 @@ public class TestExampleMetadata
     @Test
     public void getColumnMetadata()
     {
-        assertThat(metadata.getColumnMetadata(SESSION, NUMBERS_TABLE_HANDLE, new ExampleColumnHandle("text", createUnboundedVarcharType(), 0))).isEqualTo(new ColumnMetadata("text", createUnboundedVarcharType()));
+        assertThat(metadata.getColumnMetadata(SESSION, NUMBERS_TABLE_HANDLE, new ExampleColumnHandle("text", createUnboundedVarcharType(), 0, false))).isEqualTo(new ColumnMetadata("text", createUnboundedVarcharType()));
 
         // example connector assumes that the table handle and column handle are
         // properly formed, so it will return a metadata object for any

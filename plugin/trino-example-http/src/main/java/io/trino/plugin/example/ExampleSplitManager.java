@@ -15,7 +15,6 @@ package io.trino.plugin.example;
 
 import com.google.inject.Inject;
 import io.trino.spi.connector.ConnectorSession;
-import io.trino.spi.connector.ConnectorSplit;
 import io.trino.spi.connector.ConnectorSplitManager;
 import io.trino.spi.connector.ConnectorSplitSource;
 import io.trino.spi.connector.ConnectorTableHandle;
@@ -23,12 +22,6 @@ import io.trino.spi.connector.ConnectorTransactionHandle;
 import io.trino.spi.connector.Constraint;
 import io.trino.spi.connector.DynamicFilter;
 import io.trino.spi.connector.TableNotFoundException;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
@@ -55,13 +48,6 @@ public class ExampleSplitManager
         if (table == null) {
             throw new TableNotFoundException(tableHandle.toSchemaTableName());
         }
-
-        List<ConnectorSplit> splits = new ArrayList<>();
-        for (URI uri : table.getSources()) {
-            splits.add(new ExampleSplit(uri.toString(), new HashMap<>()));
-        }
-        Collections.shuffle(splits);
-
-        return new ExampleSplitSource(dynamicFilter, splits, constraint);
+        return new ExampleSplitSource(table, dynamicFilter, constraint);
     }
 }

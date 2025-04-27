@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestExampleColumnHandle
 {
-    private final ExampleColumnHandle columnHandle = new ExampleColumnHandle("columnName", createUnboundedVarcharType(), 0);
+    private final ExampleColumnHandle columnHandle = new ExampleColumnHandle("columnName", createUnboundedVarcharType(), 0, false);
 
     @Test
     public void testJsonRoundTrip()
@@ -38,13 +38,13 @@ public class TestExampleColumnHandle
     {
         EquivalenceTester.equivalenceTester()
                 .addEquivalentGroup(
-                        new ExampleColumnHandle("columnName", createUnboundedVarcharType(), 0),
-                        new ExampleColumnHandle("columnName", BIGINT, 0),
-                        new ExampleColumnHandle("columnName", createUnboundedVarcharType(), 1))
+                        new ExampleColumnHandle("columnName", createUnboundedVarcharType(), 0, false),
+                        new ExampleColumnHandle("columnName", BIGINT, 0, false),
+                        new ExampleColumnHandle("columnName", createUnboundedVarcharType(), 1, false))
                 .addEquivalentGroup(
-                        new ExampleColumnHandle("columnNameX", createUnboundedVarcharType(), 0),
-                        new ExampleColumnHandle("columnNameX", BIGINT, 0),
-                        new ExampleColumnHandle("columnNameX", createUnboundedVarcharType(), 1))
+                        new ExampleColumnHandle("columnNameX", createUnboundedVarcharType(), 0, false),
+                        new ExampleColumnHandle("columnNameX", BIGINT, 0, false),
+                        new ExampleColumnHandle("columnNameX", createUnboundedVarcharType(), 1, false))
                 .check();
     }
 }

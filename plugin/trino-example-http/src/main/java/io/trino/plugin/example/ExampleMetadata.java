@@ -108,12 +108,15 @@ public class ExampleMetadata
         ImmutableMap.Builder<String, ColumnHandle> columnHandles = ImmutableMap.builder();
         AtomicInteger index = new AtomicInteger();
         for (ColumnMetadata column : table.getColumnsMetadata()) {
-            columnHandles.put(column.getName(), new ExampleColumnHandle(column.getName(), column.getType(), index.getAndIncrement()));
+            columnHandles.put(column.getName(), new ExampleColumnHandle(column.getName(), column.getType(), index.getAndIncrement(), false));
         }
 
-//        Arrays.stream(ExampleInternalColumn.values()).iterator().forEachRemaining(column-> {
-//            columnHandles.put(column.getColumnName(), new ExampleColumnHandle(column.getColumnName(), VarcharType.createUnboundedVarcharType(), index.getAndIncrement()));
-//        });
+        Arrays.stream(ExampleInternalColumn.values()).iterator().forEachRemaining(column-> {
+            columnHandles.put(column.getName(),
+                    new ExampleColumnHandle(column.getName(),
+                            VarcharType.createUnboundedVarcharType(),
+                            index.getAndIncrement(), true));
+        });
 
         return columnHandles.buildOrThrow();
     }

@@ -23,55 +23,54 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.requireNonNull;
 
 public final class ExampleColumnHandle
-        implements ColumnHandle
-{
+        implements ColumnHandle {
     private final String columnName;
     private final Type columnType;
     private final int ordinalPosition;
+    private final boolean isHidden;
 
     @JsonCreator
     public ExampleColumnHandle(
             @JsonProperty("columnName") String columnName,
             @JsonProperty("columnType") Type columnType,
-            @JsonProperty("ordinalPosition") int ordinalPosition)
-    {
+            @JsonProperty("ordinalPosition") int ordinalPosition,
+            @JsonProperty("isHidden") boolean isHidden) {
         this.columnName = requireNonNull(columnName, "columnName is null");
         this.columnType = requireNonNull(columnType, "columnType is null");
         this.ordinalPosition = ordinalPosition;
+        this.isHidden = isHidden;
     }
 
     @JsonProperty
-    public String getColumnName()
-    {
+    public String getColumnName() {
         return columnName;
     }
 
     @JsonProperty
-    public Type getColumnType()
-    {
+    public Type getColumnType() {
         return columnType;
     }
 
     @JsonProperty
-    public int getOrdinalPosition()
-    {
+    public int getOrdinalPosition() {
         return ordinalPosition;
     }
 
-    public ColumnMetadata getColumnMetadata()
-    {
-        return new ColumnMetadata(columnName, columnType);
+    public ColumnMetadata getColumnMetadata() {
+        return ColumnMetadata.builder()
+                .setName(columnName)
+                .setType(columnType)
+                .setHidden(isHidden)
+                .build();
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return columnName.hashCode();
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -80,16 +79,19 @@ public final class ExampleColumnHandle
         }
 
         ExampleColumnHandle other = (ExampleColumnHandle) obj;
+        if(isHidden!= other.isHidden) {
+            return false;
+        }
         return columnName.equals(other.columnName);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return toStringHelper(this)
                 .add("columnName", columnName)
                 .add("columnType", columnType)
                 .add("ordinalPosition", ordinalPosition)
+                .add("isHidden", isHidden)
                 .toString();
     }
 }
