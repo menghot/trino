@@ -15,9 +15,11 @@ package io.trino.plugin.example;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
 import io.trino.spi.HostAddress;
 import io.trino.spi.connector.ConnectorSplit;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +34,8 @@ public class ExampleSplit
 
     private final String uri;
     private final Map<String, String> properties;
+    private final boolean remotelyAccessible;
+    private final List<HostAddress> addresses;
 
     @JsonCreator
     public ExampleSplit(
@@ -39,6 +43,9 @@ public class ExampleSplit
             @JsonProperty("properties") Map<String, String> properties) {
         this.uri = requireNonNull(uri, "uri is null");
         this.properties = properties;
+
+        remotelyAccessible = true;
+        addresses = ImmutableList.of(HostAddress.fromUri(URI.create(uri)));
     }
 
     @JsonProperty
@@ -56,12 +63,13 @@ public class ExampleSplit
     @Override
     public boolean isRemotelyAccessible() {
         // only http or https is remotely accessible
-        return true;
+        return remotelyAccessible;
     }
 
     @Override
-    public List<HostAddress> getAddresses() {
-        return List.of();
+    public List<HostAddress> getAddresses()
+    {
+        return addresses;
     }
 
     @Override

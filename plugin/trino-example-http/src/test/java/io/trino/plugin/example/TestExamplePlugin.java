@@ -31,9 +31,7 @@ public class TestExamplePlugin {
                 throws Exception {
             DistributedQueryRunner queryRunner = super.build();
             try {
-
                 URL metadataUrl = Resources.getResource(TestExampleClient.class, "/example-data/example-metadata-http.json");
-
                 queryRunner.installPlugin(new ExamplePlugin());
                 queryRunner.createCatalog("example", "example_http",
                         ImmutableMap.of("metadata-uri", metadataUrl.toURI().toString()));
@@ -48,7 +46,7 @@ public class TestExamplePlugin {
 
     public static void main(String[] args) throws Exception {
 
-        ExampleHttpServer exampleHttpServer = new ExampleHttpServer();
+        ExampleHttpServer exampleHttpServer = new ExampleHttpServer(8083);
         String dataUri = exampleHttpServer.resolve("/example-data/numbers-2.csv").toString();
         System.out.println(dataUri);
 

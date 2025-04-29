@@ -36,11 +36,12 @@ public class ExampleHttpServer
     private final LifeCycleManager lifeCycleManager;
     private final URI baseUri;
 
-    public ExampleHttpServer()
+    public ExampleHttpServer(int port)
     {
+
         Bootstrap app = new Bootstrap(
                 new TestingNodeModule(),
-                new TestingHttpServerModule(8083),
+                new TestingHttpServerModule(port),
                 new ExampleHttpServerModule());
 
         Injector injector = app

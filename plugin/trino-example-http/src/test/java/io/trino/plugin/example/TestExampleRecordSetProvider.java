@@ -76,7 +76,7 @@ public class TestExampleRecordSetProvider
     @BeforeAll
     public void setUp()
     {
-        exampleHttpServer = new ExampleHttpServer();
+        exampleHttpServer = new ExampleHttpServer(0);
         dataUri = exampleHttpServer.resolve("/example-data/numbers-2.csv").toString();
         System.out.println(dataUri);
     }

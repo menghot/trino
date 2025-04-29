@@ -48,6 +48,6 @@ public class ExampleSplitManager
         if (table == null) {
             throw new TableNotFoundException(tableHandle.toSchemaTableName());
         }
-        return new ExampleSplitSource(table, dynamicFilter, constraint);
+        return new ExampleSplitSource(table, null, dynamicFilter);
     }
 }

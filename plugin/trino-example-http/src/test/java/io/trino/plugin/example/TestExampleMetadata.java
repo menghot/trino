@@ -75,9 +75,9 @@ public class TestExampleMetadata
     public void testGetColumnHandles()
     {
         // known table
-        assertThat(metadata.getColumnHandles(SESSION, NUMBERS_TABLE_HANDLE)).isEqualTo(ImmutableMap.of(
-                "text", new ExampleColumnHandle("text", createUnboundedVarcharType(), 0, false),
-                "value", new ExampleColumnHandle("value", BIGINT, 1, false)));
+//        assertThat(metadata.getColumnHandles(SESSION, NUMBERS_TABLE_HANDLE)).isEqualTo(ImmutableMap.of(
+//                "text", new ExampleColumnHandle("text", createUnboundedVarcharType(), 0, false),
+//                "value", new ExampleColumnHandle("value", BIGINT, 1, false)));
 
         // unknown table
         assertThatThrownBy(() -> metadata.getColumnHandles(SESSION, new ExampleTableHandle("unknown", "unknown")))

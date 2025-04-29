@@ -77,6 +77,8 @@ public class ExampleMetadata
 
     @Override
     public Optional<ConstraintApplicationResult<ConnectorTableHandle>> applyFilter(ConnectorSession session, ConnectorTableHandle handle, Constraint constraint) {
+
+
         return ConnectorMetadata.super.applyFilter(session, handle, constraint);
     }
 

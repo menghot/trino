@@ -118,7 +118,7 @@ public class TestExampleRecordSet
     @BeforeAll
     public void setUp()
     {
-        exampleHttpServer = new ExampleHttpServer();
+        exampleHttpServer = new ExampleHttpServer(0);
         dataUri = exampleHttpServer.resolve("/example-data/numbers-2.csv").toString();
     }
 
