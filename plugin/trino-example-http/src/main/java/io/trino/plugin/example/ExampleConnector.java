@@ -15,12 +15,7 @@ package io.trino.plugin.example;
 
 import com.google.inject.Inject;
 import io.airlift.bootstrap.LifeCycleManager;
-import io.trino.spi.connector.Connector;
-import io.trino.spi.connector.ConnectorMetadata;
-import io.trino.spi.connector.ConnectorRecordSetProvider;
-import io.trino.spi.connector.ConnectorSession;
-import io.trino.spi.connector.ConnectorSplitManager;
-import io.trino.spi.connector.ConnectorTransactionHandle;
+import io.trino.spi.connector.*;
 import io.trino.spi.transaction.IsolationLevel;
 
 import static io.trino.plugin.example.ExampleTransactionHandle.INSTANCE;
@@ -32,7 +27,7 @@ public class ExampleConnector
     private final LifeCycleManager lifeCycleManager;
     private final ExampleMetadata metadata;
     private final ExampleSplitManager splitManager;
-    private final ExampleRecordSetProvider recordSetProvider;
+    private final ExampleRecordPageSourceProvider recordPageSourceProvider;
 
     @Inject
     public ExampleConnector(
@@ -44,7 +39,7 @@ public class ExampleConnector
         this.lifeCycleManager = requireNonNull(lifeCycleManager, "lifeCycleManager is null");
         this.metadata = requireNonNull(metadata, "metadata is null");
         this.splitManager = requireNonNull(splitManager, "splitManager is null");
-        this.recordSetProvider = requireNonNull(recordSetProvider, "recordSetProvider is null");
+        this.recordPageSourceProvider = new ExampleRecordPageSourceProvider(recordSetProvider);
     }
 
     @Override
@@ -66,9 +61,9 @@ public class ExampleConnector
     }
 
     @Override
-    public ConnectorRecordSetProvider getRecordSetProvider()
+    public ConnectorPageSourceProvider getPageSourceProvider()
     {
-        return recordSetProvider;
+        return recordPageSourceProvider;
     }
 
     @Override

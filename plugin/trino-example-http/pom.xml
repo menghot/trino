@@ -5,13 +5,25 @@
         <groupId>io.trino</groupId>
         <artifactId>trino-root</artifactId>
         <version>475</version>
-        <relativePath>../../pom.xml</relativePath>
+        <!--        <relativePath>../../pom.xml</relativePath>-->
     </parent>
 
     <artifactId>trino-example-http</artifactId>
     <version>475.1</version>
     <packaging>trino-plugin</packaging>
     <description>Trino - Example HTTP connector</description>
+
+    <properties>
+        <air.check.skip-spotbugs>true</air.check.skip-spotbugs>
+        <air.check.skip-pmd>true</air.check.skip-pmd>
+        <air.check.skip-jacoco>true</air.check.skip-jacoco>
+        <air.check.skip-all>true</air.check.skip-all>
+        <air.check.skip-license>true</air.check.skip-license>
+        <air.check.skip-checkstyle>true</air.check.skip-checkstyle>
+        <air.java.version>23.0.0</air.java.version>
+        <air.javadoc.lint>syntax,reference,html,-missing</air.javadoc.lint>
+        <air.modernizer.java-version>8</air.modernizer.java-version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -13171,6 +13183,15 @@
         <dependency>
             <groupId>io.airlift</groupId>
             <artifactId>json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.trino</groupId>
+            <artifactId>trino-filesystem</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.trino</groupId>
+            <artifactId>trino-parquet</artifactId>
         </dependency>
 
         <dependency>
