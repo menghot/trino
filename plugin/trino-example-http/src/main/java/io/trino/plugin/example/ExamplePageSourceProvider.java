@@ -32,11 +32,12 @@ import static io.trino.memory.context.AggregatedMemoryContext.newSimpleAggregate
 import static io.trino.plugin.example.ParquetUtils.createParquetReader;
 import static java.util.Objects.requireNonNull;
 
-public class ExampleRecordPageSourceProvider
+public class ExamplePageSourceProvider
         implements ConnectorPageSourceProvider {
+
     private final ConnectorRecordSetProvider recordSetProvider;
 
-    public ExampleRecordPageSourceProvider(ConnectorRecordSetProvider recordSetProvider) {
+    public ExamplePageSourceProvider(ConnectorRecordSetProvider recordSetProvider) {
         this.recordSetProvider = requireNonNull(recordSetProvider, "recordSetProvider is null");
     }
 
@@ -51,7 +52,7 @@ public class ExampleRecordPageSourceProvider
 
 
         // TODO: Create ParquetPageSource if is parquet file,
-        if (split.getSplitInfo().containsKey("1")) {
+        if (!split.getSplitInfo().containsKey("1")) {
 
             List<String> columnNames = columns.stream().map((columnHandle) -> {
                 ExampleColumnHandle c = (ExampleColumnHandle) columnHandle;
@@ -73,7 +74,7 @@ public class ExampleRecordPageSourceProvider
     private static ParquetPageSource getParquetPageSource(List<Type> types, List<String> columnNames) {
         try {
             ParquetDataSource dataSource = new LocalFileParquetDataSource(
-                    new File(Resources.getResource("int96_timestamps_nanos_outside_day_range.parquet").toURI()),
+                    new File(Resources.getResource("numbers.parquet").toURI()),
                     new ParquetReaderOptions());
 
             ParquetMetadata parquetMetadata = MetadataReader.readFooter(dataSource, Optional.empty());

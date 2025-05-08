@@ -27,7 +27,7 @@ public class ExampleConnector
     private final LifeCycleManager lifeCycleManager;
     private final ExampleMetadata metadata;
     private final ExampleSplitManager splitManager;
-    private final ExampleRecordPageSourceProvider recordPageSourceProvider;
+    private final ExamplePageSourceProvider pageSourceProvider;
 
     @Inject
     public ExampleConnector(
@@ -39,7 +39,7 @@ public class ExampleConnector
         this.lifeCycleManager = requireNonNull(lifeCycleManager, "lifeCycleManager is null");
         this.metadata = requireNonNull(metadata, "metadata is null");
         this.splitManager = requireNonNull(splitManager, "splitManager is null");
-        this.recordPageSourceProvider = new ExampleRecordPageSourceProvider(recordSetProvider);
+        this.pageSourceProvider = new ExamplePageSourceProvider(recordSetProvider);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class ExampleConnector
     @Override
     public ConnectorPageSourceProvider getPageSourceProvider()
     {
-        return recordPageSourceProvider;
+        return pageSourceProvider;
     }
 
     @Override

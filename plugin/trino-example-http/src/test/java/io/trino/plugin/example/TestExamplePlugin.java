@@ -51,7 +51,7 @@ public class TestExamplePlugin {
         System.out.println(dataUri);
 
         QueryRunner queryRunner = builder()
-                .addCoordinatorProperty("http-server.http.port", "8082")
+                .addCoordinatorProperty("http-server.http.port", "8081")
                 .setWorkerCount(2)
                 .build();
 
