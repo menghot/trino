@@ -27,14 +27,12 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 
 public class ExampleRecordSet
-        implements RecordSet
-{
+        implements RecordSet {
     private final List<ExampleColumnHandle> columnHandles;
     private final List<Type> columnTypes;
     private final ByteSource byteSource;
 
-    public ExampleRecordSet(ExampleSplit split, List<ExampleColumnHandle> columnHandles)
-    {
+    public ExampleRecordSet(ExampleSplit split, List<ExampleColumnHandle> columnHandles) {
         requireNonNull(split, "split is null");
 
         this.columnHandles = requireNonNull(columnHandles, "columnHandles is null");
@@ -46,21 +44,18 @@ public class ExampleRecordSet
 
         try {
             byteSource = Resources.asByteSource(URI.create(split.getUri()).toURL());
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public List<Type> getColumnTypes()
-    {
+    public List<Type> getColumnTypes() {
         return columnTypes;
     }
 
     @Override
-    public RecordCursor cursor()
-    {
+    public RecordCursor cursor() {
         return new ExampleRecordCursor(columnHandles, byteSource);
     }
 }

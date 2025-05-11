@@ -25,8 +25,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
 
-public class ExampleTable
-{
+public class ExampleTable {
     private final String name;
     private final List<ExampleColumn> columns;
     private final List<ColumnMetadata> columnsMetadata;
@@ -36,8 +35,7 @@ public class ExampleTable
     public ExampleTable(
             @JsonProperty("name") String name,
             @JsonProperty("columns") List<ExampleColumn> columns,
-            @JsonProperty("sources") List<URI> sources)
-    {
+            @JsonProperty("sources") List<URI> sources) {
         checkArgument(!isNullOrEmpty(name), "name is null or is empty");
         this.name = requireNonNull(name, "name is null");
         this.columns = ImmutableList.copyOf(requireNonNull(columns, "columns is null"));
@@ -51,25 +49,21 @@ public class ExampleTable
     }
 
     @JsonProperty
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
     @JsonProperty
-    public List<ExampleColumn> getColumns()
-    {
+    public List<ExampleColumn> getColumns() {
         return columns;
     }
 
     @JsonProperty
-    public List<URI> getSources()
-    {
+    public List<URI> getSources() {
         return sources;
     }
 
-    public List<ColumnMetadata> getColumnsMetadata()
-    {
+    public List<ColumnMetadata> getColumnsMetadata() {
         return columnsMetadata;
     }
 }

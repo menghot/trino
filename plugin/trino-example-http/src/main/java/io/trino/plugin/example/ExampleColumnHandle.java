@@ -79,7 +79,7 @@ public final class ExampleColumnHandle
         }
 
         ExampleColumnHandle other = (ExampleColumnHandle) obj;
-        if(isHidden!= other.isHidden) {
+        if (isHidden != other.isHidden) {
             return false;
         }
         return columnName.equals(other.columnName);

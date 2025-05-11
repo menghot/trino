@@ -23,29 +23,25 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class LocalFileParquetDataSource
-        extends AbstractParquetDataSource
-{
+        extends AbstractParquetDataSource {
     private final RandomAccessFile input;
 
     public LocalFileParquetDataSource(File path, ParquetReaderOptions options)
-            throws FileNotFoundException
-    {
+            throws FileNotFoundException {
         super(new ParquetDataSourceId(path.getPath()), path.length(), options);
         this.input = new RandomAccessFile(path, "r");
     }
 
     @Override
     public void close()
-            throws IOException
-    {
+            throws IOException {
         super.close();
         input.close();
     }
 
     @Override
     protected void readInternal(long position, byte[] buffer, int bufferOffset, int bufferLength)
-            throws IOException
-    {
+            throws IOException {
         input.seek(position);
         input.readFully(buffer, bufferOffset, bufferLength);
     }

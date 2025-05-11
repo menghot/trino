@@ -26,14 +26,12 @@ import java.io.IOException;
 import static java.util.Objects.requireNonNull;
 
 public class TrinoParquetDataSource
-        extends AbstractParquetDataSource
-{
+        extends AbstractParquetDataSource {
     private final FileFormatDataSourceStats stats;
     private final TrinoInput input;
 
     public TrinoParquetDataSource(TrinoInputFile file, ParquetReaderOptions options, FileFormatDataSourceStats stats)
-            throws IOException
-    {
+            throws IOException {
         super(new ParquetDataSourceId(file.location().toString()), file.length(), options);
         this.stats = requireNonNull(stats, "stats is null");
         this.input = file.newInput();
@@ -41,15 +39,13 @@ public class TrinoParquetDataSource
 
     @Override
     public void close()
-            throws IOException
-    {
+            throws IOException {
         input.close();
     }
 
     @Override
     protected Slice readTailInternal(int length)
-            throws IOException
-    {
+            throws IOException {
         long readStart = System.nanoTime();
         Slice tail = input.readTail(length);
         stats.readDataBytesPerSecond(tail.length(), System.nanoTime() - readStart);
@@ -58,8 +54,7 @@ public class TrinoParquetDataSource
 
     @Override
     protected void readInternal(long position, byte[] buffer, int bufferOffset, int bufferLength)
-            throws IOException
-    {
+            throws IOException {
         long readStart = System.nanoTime();
         input.readFully(position, buffer, bufferOffset, bufferLength);
         stats.readDataBytesPerSecond(bufferLength, System.nanoTime() - readStart);

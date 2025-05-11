@@ -22,8 +22,7 @@ import static io.trino.plugin.example.ExampleTransactionHandle.INSTANCE;
 import static java.util.Objects.requireNonNull;
 
 public class ExampleConnector
-        implements Connector
-{
+        implements Connector {
     private final LifeCycleManager lifeCycleManager;
     private final ExampleMetadata metadata;
     private final ExampleSplitManager splitManager;
@@ -34,8 +33,7 @@ public class ExampleConnector
             LifeCycleManager lifeCycleManager,
             ExampleMetadata metadata,
             ExampleSplitManager splitManager,
-            ExampleRecordSetProvider recordSetProvider)
-    {
+            ExampleRecordSetProvider recordSetProvider) {
         this.lifeCycleManager = requireNonNull(lifeCycleManager, "lifeCycleManager is null");
         this.metadata = requireNonNull(metadata, "metadata is null");
         this.splitManager = requireNonNull(splitManager, "splitManager is null");
@@ -43,32 +41,27 @@ public class ExampleConnector
     }
 
     @Override
-    public ConnectorTransactionHandle beginTransaction(IsolationLevel isolationLevel, boolean readOnly, boolean autoCommit)
-    {
+    public ConnectorTransactionHandle beginTransaction(IsolationLevel isolationLevel, boolean readOnly, boolean autoCommit) {
         return INSTANCE;
     }
 
     @Override
-    public ConnectorMetadata getMetadata(ConnectorSession session, ConnectorTransactionHandle transactionHandle)
-    {
+    public ConnectorMetadata getMetadata(ConnectorSession session, ConnectorTransactionHandle transactionHandle) {
         return metadata;
     }
 
     @Override
-    public ConnectorSplitManager getSplitManager()
-    {
+    public ConnectorSplitManager getSplitManager() {
         return splitManager;
     }
 
     @Override
-    public ConnectorPageSourceProvider getPageSourceProvider()
-    {
+    public ConnectorPageSourceProvider getPageSourceProvider() {
         return pageSourceProvider;
     }
 
     @Override
-    public final void shutdown()
-    {
+    public final void shutdown() {
         lifeCycleManager.stop();
     }
 }

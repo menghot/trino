@@ -14,14 +14,10 @@
 package io.trino.plugin.example;
 
 import com.google.inject.Inject;
-import io.trino.spi.connector.ConnectorSession;
-import io.trino.spi.connector.ConnectorSplitManager;
-import io.trino.spi.connector.ConnectorSplitSource;
-import io.trino.spi.connector.ConnectorTableHandle;
-import io.trino.spi.connector.ConnectorTransactionHandle;
-import io.trino.spi.connector.Constraint;
-import io.trino.spi.connector.DynamicFilter;
-import io.trino.spi.connector.TableNotFoundException;
+import io.trino.spi.connector.*;
+
+import java.net.URI;
+import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
@@ -45,9 +41,13 @@ public class ExampleSplitManager
         ExampleTable table = exampleClient.getTable(tableHandle.getSchemaName(), tableHandle.getTableName());
 
         // this can happen if table is removed during a query
-        if (table == null) {
-            throw new TableNotFoundException(tableHandle.toSchemaTableName());
-        }
-        return new ExampleSplitSource(table, null, dynamicFilter);
+        //if (table == null) {
+        //throw new TableNotFoundException(tableHandle.toSchemaTableName());
+        //}
+
+        table = new ExampleTable(tableHandle.getTableName(), List.of(), List.of(URI.create("http://example.com:8080/abc")));
+
+
+        return new ExampleSplitSource(table, tableHandle, dynamicFilter);
     }
 }

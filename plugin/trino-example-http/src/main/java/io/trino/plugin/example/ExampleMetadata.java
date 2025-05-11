@@ -16,43 +16,58 @@ package io.trino.plugin.example;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Resources;
 import com.google.inject.Inject;
+import io.trino.parquet.ParquetDataSource;
+import io.trino.parquet.ParquetReaderOptions;
+import io.trino.parquet.metadata.FileMetadata;
+import io.trino.parquet.metadata.ParquetMetadata;
+import io.trino.parquet.reader.MetadataReader;
 import io.trino.spi.TrinoException;
 import io.trino.spi.connector.*;
 import io.trino.spi.type.Type;
 import io.trino.spi.type.VarcharType;
+import org.apache.parquet.io.MessageColumnIO;
+import org.apache.parquet.schema.MessageType;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static io.trino.parquet.ParquetTypeUtils.getColumnIO;
+import static io.trino.plugin.example.ParquetTypeUtils.convertParquetTypeToTrino;
 import static io.trino.spi.StandardErrorCode.NOT_SUPPORTED;
 import static java.util.Objects.requireNonNull;
 
 public class ExampleMetadata
-        implements ConnectorMetadata
-{
+        implements ConnectorMetadata {
     private final ExampleClient exampleClient;
 
     @Inject
-    public ExampleMetadata(ExampleClient exampleClient)
-    {
+    public ExampleMetadata(ExampleClient exampleClient) {
         this.exampleClient = requireNonNull(exampleClient, "exampleClient is null");
     }
 
     @Override
-    public List<String> listSchemaNames(ConnectorSession session)
-    {
+    public List<String> listSchemaNames(ConnectorSession session) {
         return listSchemaNames();
     }
 
-    public List<String> listSchemaNames()
-    {
+    public List<String> listSchemaNames() {
         return ImmutableList.copyOf(exampleClient.getSchemaNames());
     }
 
     @Override
-    public ExampleTableHandle getTableHandle(ConnectorSession session, SchemaTableName tableName, Optional<ConnectorTableVersion> startVersion, Optional<ConnectorTableVersion> endVersion)
-    {
+    public ExampleTableHandle getTableHandle(ConnectorSession session, SchemaTableName tableName, Optional<ConnectorTableVersion> startVersion, Optional<ConnectorTableVersion> endVersion) {
+
+        System.out.println(tableName);
+        if (tableName.getTableName().endsWith(".parquet")) {
+            //
+            return new ExampleTableHandle(tableName.getSchemaName(), tableName.getTableName());
+        }
+
         if (startVersion.isPresent() || endVersion.isPresent()) {
             throw new TrinoException(NOT_SUPPORTED, "This connector does not support versioned tables");
         }
@@ -70,8 +85,7 @@ public class ExampleMetadata
     }
 
     @Override
-    public ConnectorTableMetadata getTableMetadata(ConnectorSession session, ConnectorTableHandle table)
-    {
+    public ConnectorTableMetadata getTableMetadata(ConnectorSession session, ConnectorTableHandle table) {
         return getTableMetadata(((ExampleTableHandle) table).toSchemaTableName());
     }
 
@@ -83,8 +97,9 @@ public class ExampleMetadata
     }
 
     @Override
-    public List<SchemaTableName> listTables(ConnectorSession session, Optional<String> optionalSchemaName)
-    {
+    public List<SchemaTableName> listTables(ConnectorSession session, Optional<String> optionalSchemaName) {
+        // TODO Auto discovery parquet files, csv, excel files
+
         Set<String> schemaNames = optionalSchemaName.map(ImmutableSet::of)
                 .orElseGet(() -> ImmutableSet.copyOf(exampleClient.getSchemaNames()));
 
@@ -98,9 +113,16 @@ public class ExampleMetadata
     }
 
     @Override
-    public Map<String, ColumnHandle> getColumnHandles(ConnectorSession session, ConnectorTableHandle tableHandle)
-    {
+    public Map<String, ColumnHandle> getColumnHandles(ConnectorSession session, ConnectorTableHandle tableHandle) {
         ExampleTableHandle exampleTableHandle = (ExampleTableHandle) tableHandle;
+        if (exampleTableHandle.getTableName().endsWith(".parquet")) {
+            ImmutableMap.Builder<String, ColumnHandle> columnHandles = ImmutableMap.builder();
+            AtomicInteger index = new AtomicInteger();
+            for (ColumnMetadata column : getTableMetadata(session, exampleTableHandle).getColumns()) {
+                columnHandles.put(column.getName(), new ExampleColumnHandle(column.getName(), column.getType(), index.getAndIncrement(), false));
+            }
+            return columnHandles.buildOrThrow();
+        }
 
         ExampleTable table = exampleClient.getTable(exampleTableHandle.getSchemaName(), exampleTableHandle.getTableName());
         if (table == null) {
@@ -113,7 +135,7 @@ public class ExampleMetadata
             columnHandles.put(column.getName(), new ExampleColumnHandle(column.getName(), column.getType(), index.getAndIncrement(), false));
         }
 
-        Arrays.stream(ExampleInternalColumn.values()).iterator().forEachRemaining(column-> {
+        Arrays.stream(ExampleInternalColumn.values()).iterator().forEachRemaining(column -> {
             columnHandles.put(column.getName(),
                     new ExampleColumnHandle(column.getName(),
                             VarcharType.createUnboundedVarcharType(),
@@ -124,8 +146,7 @@ public class ExampleMetadata
     }
 
     @Override
-    public Map<SchemaTableName, List<ColumnMetadata>> listTableColumns(ConnectorSession session, SchemaTablePrefix prefix)
-    {
+    public Map<SchemaTableName, List<ColumnMetadata>> listTableColumns(ConnectorSession session, SchemaTablePrefix prefix) {
         requireNonNull(prefix, "prefix is null");
         ImmutableMap.Builder<SchemaTableName, List<ColumnMetadata>> columns = ImmutableMap.builder();
         for (SchemaTableName tableName : listTables(session, prefix)) {
@@ -138,8 +159,39 @@ public class ExampleMetadata
         return columns.buildOrThrow();
     }
 
-    private ConnectorTableMetadata getTableMetadata(SchemaTableName tableName)
-    {
+
+    private ConnectorTableMetadata getTableMetadata(SchemaTableName tableName) {
+        System.out.println(tableName);
+
+        if (tableName.getTableName().endsWith(".parquet")) {
+            try {
+                ParquetDataSource dataSource = new LocalFileParquetDataSource(
+                        new File(Resources.getResource("numbers.parquet").toURI()),
+                        new ParquetReaderOptions());
+
+                ParquetMetadata parquetMetadata = MetadataReader.readFooter(dataSource, Optional.empty());
+                System.out.println(parquetMetadata);
+
+                FileMetadata fileMetaData = parquetMetadata.getFileMetaData();
+                MessageType fileSchema = fileMetaData.getSchema();
+
+                MessageColumnIO messageColumnIO = getColumnIO(fileSchema, fileSchema);
+                System.out.println(messageColumnIO);
+
+                ImmutableList.Builder<ColumnMetadata> columnsMetadata = ImmutableList.builder();
+                for (org.apache.parquet.schema.Type field : fileSchema.getFields()) {
+                    String name = field.getName();
+                    Type trinoType = convertParquetTypeToTrino(field);
+                    columnsMetadata.add(new ColumnMetadata(name, trinoType));
+                }
+
+                return new ConnectorTableMetadata(tableName, columnsMetadata.build());
+
+            } catch (URISyntaxException | IOException e) {
+
+            }
+        }
+
         if (!listSchemaNames().contains(tableName.getSchemaName())) {
             return null;
         }
@@ -152,8 +204,7 @@ public class ExampleMetadata
         return new ConnectorTableMetadata(tableName, table.getColumnsMetadata());
     }
 
-    private List<SchemaTableName> listTables(ConnectorSession session, SchemaTablePrefix prefix)
-    {
+    private List<SchemaTableName> listTables(ConnectorSession session, SchemaTablePrefix prefix) {
         if (prefix.getTable().isEmpty()) {
             return listTables(session, prefix.getSchema());
         }
@@ -161,8 +212,7 @@ public class ExampleMetadata
     }
 
     @Override
-    public ColumnMetadata getColumnMetadata(ConnectorSession session, ConnectorTableHandle tableHandle, ColumnHandle columnHandle)
-    {
+    public ColumnMetadata getColumnMetadata(ConnectorSession session, ConnectorTableHandle tableHandle, ColumnHandle columnHandle) {
         return ((ExampleColumnHandle) columnHandle).getColumnMetadata();
     }
 }

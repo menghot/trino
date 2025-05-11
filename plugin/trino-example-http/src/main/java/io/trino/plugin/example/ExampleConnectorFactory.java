@@ -27,17 +27,14 @@ import static io.trino.plugin.base.Versions.checkStrictSpiVersionMatch;
 import static java.util.Objects.requireNonNull;
 
 public class ExampleConnectorFactory
-        implements ConnectorFactory
-{
+        implements ConnectorFactory {
     @Override
-    public String getName()
-    {
+    public String getName() {
         return "example_http";
     }
 
     @Override
-    public Connector create(String catalogName, Map<String, String> requiredConfig, ConnectorContext context)
-    {
+    public Connector create(String catalogName, Map<String, String> requiredConfig, ConnectorContext context) {
         requireNonNull(requiredConfig, "requiredConfig is null");
         checkStrictSpiVersionMatch(context, this);
 

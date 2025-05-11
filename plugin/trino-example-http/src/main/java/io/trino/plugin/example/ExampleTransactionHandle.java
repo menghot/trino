@@ -16,7 +16,6 @@ package io.trino.plugin.example;
 import io.trino.spi.connector.ConnectorTransactionHandle;
 
 public enum ExampleTransactionHandle
-        implements ConnectorTransactionHandle
-{
+        implements ConnectorTransactionHandle {
     INSTANCE
 }

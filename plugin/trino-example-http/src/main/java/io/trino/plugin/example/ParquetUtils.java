@@ -140,8 +140,9 @@ public class ParquetUtils {
                                 types.get(i),
                                 columnIO)
                                 .orElseThrow()));
+            } else {
+                throw new RuntimeException("Column '" + columnNames.get(i) + "' not found in parquet file");
             }
-
         }
         Map<List<String>, ColumnDescriptor> descriptorsByPath = getDescriptors(fileSchema, fileSchema);
         TupleDomain<ColumnDescriptor> parquetTupleDomain = predicate.transformKeys(

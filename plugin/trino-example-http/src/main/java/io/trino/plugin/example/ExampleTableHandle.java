@@ -23,46 +23,39 @@ import java.util.Objects;
 import static java.util.Objects.requireNonNull;
 
 public final class ExampleTableHandle
-        implements ConnectorTableHandle
-{
+        implements ConnectorTableHandle {
     private final String schemaName;
     private final String tableName;
 
     @JsonCreator
     public ExampleTableHandle(
             @JsonProperty("schemaName") String schemaName,
-            @JsonProperty("tableName") String tableName)
-    {
+            @JsonProperty("tableName") String tableName) {
         this.schemaName = requireNonNull(schemaName, "schemaName is null");
         this.tableName = requireNonNull(tableName, "tableName is null");
     }
 
     @JsonProperty
-    public String getSchemaName()
-    {
+    public String getSchemaName() {
         return schemaName;
     }
 
     @JsonProperty
-    public String getTableName()
-    {
+    public String getTableName() {
         return tableName;
     }
 
-    public SchemaTableName toSchemaTableName()
-    {
+    public SchemaTableName toSchemaTableName() {
         return new SchemaTableName(schemaName, tableName);
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(schemaName, tableName);
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -76,8 +69,7 @@ public final class ExampleTableHandle
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return schemaName + ":" + tableName;
     }
 }

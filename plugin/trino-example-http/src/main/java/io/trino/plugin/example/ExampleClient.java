@@ -37,27 +37,23 @@ import static com.google.common.collect.Maps.uniqueIndex;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
-public class ExampleClient
-{
+public class ExampleClient {
     /**
      * SchemaName -> (TableName -> TableMetadata)
      */
     private final Supplier<Map<String, Map<String, ExampleTable>>> schemas;
 
     @Inject
-    public ExampleClient(ExampleConfig config, JsonCodec<Map<String, List<ExampleTable>>> catalogCodec)
-    {
+    public ExampleClient(ExampleConfig config, JsonCodec<Map<String, List<ExampleTable>>> catalogCodec) {
         requireNonNull(catalogCodec, "catalogCodec is null");
         schemas = Suppliers.memoize(schemasSupplier(catalogCodec, config.getMetadata()));
     }
 
-    public Set<String> getSchemaNames()
-    {
+    public Set<String> getSchemaNames() {
         return schemas.get().keySet();
     }
 
-    public Set<String> getTableNames(String schema)
-    {
+    public Set<String> getTableNames(String schema) {
         requireNonNull(schema, "schema is null");
         Map<String, ExampleTable> tables = schemas.get().get(schema);
         if (tables == null) {
@@ -66,8 +62,7 @@ public class ExampleClient
         return tables.keySet();
     }
 
-    public ExampleTable getTable(String schema, String tableName)
-    {
+    public ExampleTable getTable(String schema, String tableName) {
         requireNonNull(schema, "schema is null");
         requireNonNull(tableName, "tableName is null");
         Map<String, ExampleTable> tables = schemas.get().get(schema);
@@ -77,21 +72,18 @@ public class ExampleClient
         return tables.get(tableName);
     }
 
-    private static Supplier<Map<String, Map<String, ExampleTable>>> schemasSupplier(JsonCodec<Map<String, List<ExampleTable>>> catalogCodec, URI metadataUri)
-    {
+    private static Supplier<Map<String, Map<String, ExampleTable>>> schemasSupplier(JsonCodec<Map<String, List<ExampleTable>>> catalogCodec, URI metadataUri) {
         return () -> {
             try {
                 return lookupSchemas(metadataUri, catalogCodec);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
         };
     }
 
     private static Map<String, Map<String, ExampleTable>> lookupSchemas(URI metadataUri, JsonCodec<Map<String, List<ExampleTable>>> catalogCodec)
-            throws IOException
-    {
+            throws IOException {
         URL result = metadataUri.toURL();
         String json = Resources.toString(result, UTF_8);
         Map<String, List<ExampleTable>> catalog = catalogCodec.fromJson(json);
@@ -99,16 +91,14 @@ public class ExampleClient
         return ImmutableMap.copyOf(transformValues(catalog, resolveAndIndexTables(metadataUri)));
     }
 
-    private static Function<List<ExampleTable>, Map<String, ExampleTable>> resolveAndIndexTables(URI metadataUri)
-    {
+    private static Function<List<ExampleTable>, Map<String, ExampleTable>> resolveAndIndexTables(URI metadataUri) {
         return tables -> {
             Iterable<ExampleTable> resolvedTables = transform(tables, tableUriResolver(metadataUri));
             return ImmutableMap.copyOf(uniqueIndex(resolvedTables, ExampleTable::getName));
         };
     }
 
-    private static Function<ExampleTable, ExampleTable> tableUriResolver(URI baseUri)
-    {
+    private static Function<ExampleTable, ExampleTable> tableUriResolver(URI baseUri) {
         return table -> {
             List<URI> sources = ImmutableList.copyOf(transform(table.getSources(), baseUri::resolve));
             return new ExampleTable(table.getName(), table.getColumns(), sources);

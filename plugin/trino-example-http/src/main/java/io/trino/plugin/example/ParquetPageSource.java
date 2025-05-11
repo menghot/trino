@@ -30,56 +30,47 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 public class ParquetPageSource
-        implements ConnectorPageSource
-{
+        implements ConnectorPageSource {
     private final ParquetReader parquetReader;
 
     private boolean closed;
     private long completedPositions;
 
-    public ParquetPageSource(ParquetReader parquetReader)
-    {
+    public ParquetPageSource(ParquetReader parquetReader) {
         this.parquetReader = requireNonNull(parquetReader, "parquetReader is null");
     }
 
     @Override
-    public long getCompletedBytes()
-    {
+    public long getCompletedBytes() {
         return parquetReader.getDataSource().getReadBytes();
     }
 
     @Override
-    public OptionalLong getCompletedPositions()
-    {
+    public OptionalLong getCompletedPositions() {
         return OptionalLong.of(completedPositions);
     }
 
     @Override
-    public long getReadTimeNanos()
-    {
+    public long getReadTimeNanos() {
         return parquetReader.getDataSource().getReadTimeNanos();
     }
 
     @Override
-    public boolean isFinished()
-    {
+    public boolean isFinished() {
         return closed;
     }
 
     @Override
-    public long getMemoryUsage()
-    {
+    public long getMemoryUsage() {
         return parquetReader.getMemoryContext().getBytes();
     }
 
     @Override
-    public SourcePage getNextSourcePage()
-    {
+    public SourcePage getNextSourcePage() {
         SourcePage page;
         try {
             page = parquetReader.nextPage();
-        }
-        catch (IOException | RuntimeException e) {
+        } catch (IOException | RuntimeException e) {
             closeAllSuppress(e, this);
             throw handleException(parquetReader.getDataSource().getId(), e);
         }
@@ -94,8 +85,7 @@ public class ParquetPageSource
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         if (closed) {
             return;
         }
@@ -103,20 +93,17 @@ public class ParquetPageSource
 
         try {
             parquetReader.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     @Override
-    public Metrics getMetrics()
-    {
+    public Metrics getMetrics() {
         return parquetReader.getMetrics();
     }
 
-    static TrinoException handleException(ParquetDataSourceId dataSourceId, Exception exception)
-    {
+    static TrinoException handleException(ParquetDataSourceId dataSourceId, Exception exception) {
         if (exception instanceof TrinoException trinoException) {
             return trinoException;
         }

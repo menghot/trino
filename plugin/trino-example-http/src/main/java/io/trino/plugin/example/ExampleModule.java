@@ -22,11 +22,9 @@ import static io.airlift.json.JsonCodec.listJsonCodec;
 import static io.airlift.json.JsonCodecBinder.jsonCodecBinder;
 
 public class ExampleModule
-        implements Module
-{
+        implements Module {
     @Override
-    public void configure(Binder binder)
-    {
+    public void configure(Binder binder) {
         binder.bind(ExampleConnector.class).in(Scopes.SINGLETON);
         binder.bind(ExampleMetadata.class).in(Scopes.SINGLETON);
         binder.bind(ExampleClient.class).in(Scopes.SINGLETON);

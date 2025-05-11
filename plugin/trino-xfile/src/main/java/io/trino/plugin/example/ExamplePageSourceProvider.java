@@ -79,7 +79,7 @@ public class ExamplePageSourceProvider
 
     private static ParquetPageSource getParquetPageSource(List<Type> types, List<String> columnNames) {
         try {
-            ParquetDataSource dataSource = new LocalFileParquetDataSource(
+            ParquetDataSource dataSource = new LocalFileDataSource(
                     new File(Resources.getResource("numbers.parquet").toURI()),
                     new ParquetReaderOptions());
 

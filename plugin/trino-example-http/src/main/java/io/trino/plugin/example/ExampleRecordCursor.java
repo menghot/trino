@@ -19,14 +19,11 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.CountingInputStream;
 import io.airlift.slice.Slice;
 import io.airlift.slice.Slices;
-import io.trino.spi.block.Block;
-import io.trino.spi.block.SqlMap;
 import io.trino.spi.connector.RecordCursor;
-import io.trino.spi.type.*;
+import io.trino.spi.type.Type;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,16 +31,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static io.trino.spi.type.BigintType.BIGINT;
 import static io.trino.spi.type.BooleanType.BOOLEAN;
-import static io.trino.spi.type.DateType.DATE;
 import static io.trino.spi.type.DoubleType.DOUBLE;
-import static io.trino.spi.type.TimestampType.TIMESTAMP_MILLIS;
-import static io.trino.spi.type.VarbinaryType.VARBINARY;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class ExampleRecordCursor
-        implements RecordCursor
-{
+        implements RecordCursor {
     private static final Splitter LINE_SPLITTER = Splitter.on(",").trimResults();
 
     private final List<ExampleColumnHandle> columnHandles;
@@ -54,8 +47,7 @@ public class ExampleRecordCursor
 
     private List<String> fields;
 
-    public ExampleRecordCursor(List<ExampleColumnHandle> columnHandles, ByteSource byteSource)
-    {
+    public ExampleRecordCursor(List<ExampleColumnHandle> columnHandles, ByteSource byteSource) {
         this.columnHandles = columnHandles;
 
         fieldToColumnIndex = new int[columnHandles.size()];
@@ -67,34 +59,29 @@ public class ExampleRecordCursor
         try (CountingInputStream input = new CountingInputStream(byteSource.openStream())) {
             lines = byteSource.asCharSource(UTF_8).readLines().iterator();
             totalBytes = input.getCount();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     @Override
-    public long getCompletedBytes()
-    {
+    public long getCompletedBytes() {
         return totalBytes;
     }
 
     @Override
-    public long getReadTimeNanos()
-    {
+    public long getReadTimeNanos() {
         return 0;
     }
 
     @Override
-    public Type getType(int field)
-    {
+    public Type getType(int field) {
         checkArgument(field < columnHandles.size(), "Invalid field index");
         return columnHandles.get(field).getColumnType();
     }
 
     @Override
-    public boolean advanceNextPosition()
-    {
+    public boolean advanceNextPosition() {
         if (!lines.hasNext()) {
             return false;
         }
@@ -104,8 +91,7 @@ public class ExampleRecordCursor
         return true;
     }
 
-    private String getFieldValue(int field)
-    {
+    private String getFieldValue(int field) {
         checkState(fields != null, "Cursor has not been advanced yet");
 
         int columnIndex = fieldToColumnIndex[field];
@@ -113,48 +99,41 @@ public class ExampleRecordCursor
     }
 
     @Override
-    public boolean getBoolean(int field)
-    {
+    public boolean getBoolean(int field) {
         checkFieldType(field, BOOLEAN);
         return Boolean.parseBoolean(getFieldValue(field));
     }
 
     @Override
-    public long getLong(int field)
-    {
+    public long getLong(int field) {
         checkFieldType(field, BIGINT);
         return Long.parseLong(getFieldValue(field));
     }
 
     @Override
-    public double getDouble(int field)
-    {
+    public double getDouble(int field) {
         checkFieldType(field, DOUBLE);
         return Double.parseDouble(getFieldValue(field));
     }
 
     @Override
-    public Slice getSlice(int field)
-    {
+    public Slice getSlice(int field) {
         checkFieldType(field, createUnboundedVarcharType());
         return Slices.utf8Slice(getFieldValue(field));
     }
 
     @Override
-    public Object getObject(int field)
-    {
+    public Object getObject(int field) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean isNull(int field)
-    {
+    public boolean isNull(int field) {
         checkArgument(field < columnHandles.size(), "Invalid field index");
         return Strings.isNullOrEmpty(getFieldValue(field));
     }
 
-    private void checkFieldType(int field, Type expected)
-    {
+    private void checkFieldType(int field, Type expected) {
         Type actual = getType(field);
         checkArgument(actual.equals(expected), "Expected field %s to be type %s but is %s", field, expected, actual);
     }
@@ -195,5 +174,6 @@ public class ExampleRecordCursor
 //    }
 
     @Override
-    public void close() {}
+    public void close() {
+    }
 }

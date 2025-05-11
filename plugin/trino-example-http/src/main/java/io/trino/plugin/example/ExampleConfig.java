@@ -18,23 +18,19 @@ import jakarta.validation.constraints.NotNull;
 
 import java.net.URI;
 
-public class ExampleConfig
-{
+public class ExampleConfig {
     private URI metadata;
-    private  String authentication;
+    private String authentication;
     private String credentials;
 
     @NotNull
-    public URI getMetadata()
-    {
+    public URI getMetadata() {
         return metadata;
     }
 
 
-
     @Config("metadata-uri")
-    public ExampleConfig setMetadata(URI metadata)
-    {
+    public ExampleConfig setMetadata(URI metadata) {
         this.metadata = metadata;
         return this;
     }

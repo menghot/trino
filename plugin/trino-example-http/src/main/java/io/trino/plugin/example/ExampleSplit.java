@@ -28,8 +28,7 @@ import static io.airlift.slice.SizeOf.instanceSize;
 import static java.util.Objects.requireNonNull;
 
 public class ExampleSplit
-        implements ConnectorSplit
-{
+        implements ConnectorSplit {
     private static final int INSTANCE_SIZE = instanceSize(ExampleSplit.class);
 
     private final String uri;
@@ -49,8 +48,7 @@ public class ExampleSplit
     }
 
     @JsonProperty
-    public String getUri()
-    {
+    public String getUri() {
         return uri;
     }
 
@@ -67,8 +65,7 @@ public class ExampleSplit
     }
 
     @Override
-    public List<HostAddress> getAddresses()
-    {
+    public List<HostAddress> getAddresses() {
         return addresses;
     }
 

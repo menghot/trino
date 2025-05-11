@@ -165,7 +165,7 @@ public class ExampleMetadata
 
         if (tableName.getTableName().endsWith(".parquet")) {
             try {
-                ParquetDataSource dataSource = new LocalFileParquetDataSource(
+                ParquetDataSource dataSource = new LocalFileDataSource(
                         new File(Resources.getResource("numbers.parquet").toURI()),
                         new ParquetReaderOptions());
 
