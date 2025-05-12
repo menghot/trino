@@ -22,11 +22,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-public class LocalFileDataSource
+public class LocalParquetDataSource
         extends AbstractParquetDataSource {
     private final RandomAccessFile input;
 
-    public LocalFileDataSource(File path, ParquetReaderOptions options)
+    public LocalParquetDataSource(File path, ParquetReaderOptions options)
             throws FileNotFoundException {
         super(new ParquetDataSourceId(path.getPath()), path.length(), options);
         this.input = new RandomAccessFile(path, "r");

@@ -62,7 +62,7 @@ public class ExampleMetadata
     @Override
     public ExampleTableHandle getTableHandle(ConnectorSession session, SchemaTableName tableName, Optional<ConnectorTableVersion> startVersion, Optional<ConnectorTableVersion> endVersion) {
 
-        System.out.println(tableName);
+        //System.out.println(tableName);
         if (tableName.getTableName().endsWith(".parquet")) {
             //
             return new ExampleTableHandle(tableName.getSchemaName(), tableName.getTableName());
@@ -165,7 +165,7 @@ public class ExampleMetadata
 
         if (tableName.getTableName().endsWith(".parquet")) {
             try {
-                ParquetDataSource dataSource = new LocalFileDataSource(
+                ParquetDataSource dataSource = new LocalParquetDataSource(
                         new File(Resources.getResource("numbers.parquet").toURI()),
                         new ParquetReaderOptions());
 

@@ -19,7 +19,7 @@ import io.trino.parquet.ParquetReaderOptions;
 import io.trino.parquet.metadata.ParquetMetadata;
 import io.trino.parquet.reader.MetadataReader;
 import io.trino.parquet.reader.ParquetReader;
-import io.trino.plugin.hive.avro.AvroPageSource;
+//import io.trino.plugin.hive.avro.AvroPageSource;
 import io.trino.spi.connector.*;
 import io.trino.spi.type.Type;
 
@@ -51,7 +51,6 @@ public class ExamplePageSourceProvider
             List<ColumnHandle> columns,
             DynamicFilter dynamicFilter) {
 
-
         // TODO: Create ParquetPageSource if is parquet file,
         if (!split.getSplitInfo().containsKey("1")) {
 
@@ -72,20 +71,19 @@ public class ExamplePageSourceProvider
         return new RecordPageSource(recordSetProvider.getRecordSet(transaction, session, split, table, columns));
     }
 
-    private static AvroPageSource getAvroPageSource() {
-
-        return null;
-    }
+//    private static AvroPageSource getAvroPageSource() {
+//
+//        return null;
+//    }
 
     private static ParquetPageSource getParquetPageSource(List<Type> types, List<String> columnNames) {
         try {
-            ParquetDataSource dataSource = new LocalFileDataSource(
+            ParquetDataSource dataSource = new LocalParquetDataSource(
                     new File(Resources.getResource("numbers.parquet").toURI()),
                     new ParquetReaderOptions());
 
             ParquetMetadata parquetMetadata = MetadataReader.readFooter(dataSource, Optional.empty());
             ParquetReader reader = createParquetReader(dataSource, parquetMetadata, newSimpleAggregatedMemoryContext(), types, columnNames);
-
 
             return new ParquetPageSource(reader);
         } catch (IOException | URISyntaxException e) {

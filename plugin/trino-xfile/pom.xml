@@ -13189,15 +13189,21 @@
             <artifactId>trino-filesystem</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>io.trino</groupId>
-            <artifactId>trino-hive</artifactId>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>io.trino</groupId>-->
+        <!--            <artifactId>trino-hive</artifactId>-->
+        <!--            <exclusions>-->
+        <!--                <exclusion>-->
+        <!--                    <groupId>org.rocksdb</groupId>-->
+        <!--                    <artifactId>rocksdbjni</artifactId>-->
+        <!--                </exclusion>-->
+        <!--            </exclusions>-->
+        <!--        </dependency>-->
 
-        <dependency>
-            <groupId>io.trino</groupId>
-            <artifactId>trino-hive-formats</artifactId>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>io.trino</groupId>-->
+        <!--            <artifactId>trino-hive-formats</artifactId>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>io.trino</groupId>
@@ -13333,6 +13339,37 @@
             </activation>
             <build>
                 <plugins>
+                    <plugin>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.8.1</version>
+                        <configuration>
+                            <skip>false</skip>
+                            <failOnWarning>true</failOnWarning>
+                            <ignoreNonCompile>true</ignoreNonCompile>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm</artifactId>
+                                <version>9.8</version>
+                                <scope>compile</scope>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>analyze-only</goal>
+                                    <goal>analyze-duplicate</goal>
+                                </goals>
+                                <phase>process-test-classes</phase>
+                                <configuration>
+                                    <skip>true</skip>
+                                    <failOnWarning>true</failOnWarning>
+                                    <ignoreNonCompile>true</ignoreNonCompile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>io.trino</groupId>
                         <artifactId>trino-maven-plugin</artifactId>

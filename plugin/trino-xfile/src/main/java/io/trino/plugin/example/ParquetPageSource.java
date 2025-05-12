@@ -16,6 +16,9 @@ package io.trino.plugin.example;
 import io.trino.parquet.ParquetCorruptionException;
 import io.trino.parquet.ParquetDataSourceId;
 import io.trino.parquet.reader.ParquetReader;
+import io.trino.spi.ErrorCode;
+import io.trino.spi.ErrorCodeSupplier;
+import io.trino.spi.ErrorType;
 import io.trino.spi.TrinoException;
 import io.trino.spi.connector.ConnectorPageSource;
 import io.trino.spi.connector.SourcePage;
@@ -107,9 +110,6 @@ public class ParquetPageSource
         if (exception instanceof TrinoException trinoException) {
             return trinoException;
         }
-        if (exception instanceof ParquetCorruptionException) {
-            return new TrinoException(null, exception);
-        }
-        return new TrinoException(null, format("Failed to read Parquet file: %s", dataSourceId), exception);
+        return new TrinoException(() -> new ErrorCode(0,exception.getLocalizedMessage(), ErrorType.EXTERNAL), exception);
     }
 }

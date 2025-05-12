@@ -72,33 +72,6 @@ public class ParquetUtils {
     private ParquetUtils() {
     }
 
-    public static Slice writeParquetFile(ParquetWriterOptions writerOptions, List<Type> types, List<String> columnNames, List<Page> inputPages)
-            throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ParquetWriter writer = createParquetWriter(outputStream, writerOptions, types, columnNames, CompressionCodec.SNAPPY);
-
-        for (Page inputPage : inputPages) {
-            checkArgument(types.size() == inputPage.getChannelCount());
-            writer.write(inputPage);
-        }
-        writer.close();
-        return Slices.wrappedBuffer(outputStream.toByteArray());
-    }
-
-    public static ParquetWriter createParquetWriter(OutputStream outputStream, ParquetWriterOptions writerOptions, List<Type> types, List<String> columnNames, CompressionCodec compression) {
-        checkArgument(types.size() == columnNames.size());
-        ParquetSchemaConverter schemaConverter = new ParquetSchemaConverter(types, columnNames, false, false);
-        return new ParquetWriter(
-                outputStream,
-                schemaConverter.getMessageType(),
-                schemaConverter.getPrimitiveTypes(),
-                writerOptions,
-                compression,
-                "test-version",
-                Optional.of(DateTimeZone.getDefault()),
-                Optional.empty());
-    }
-
     public static ParquetReader createParquetReader(
             ParquetDataSource input,
             ParquetMetadata parquetMetadata,
@@ -159,6 +132,7 @@ public class ParquetUtils {
                 UTC,
                 1000,
                 options);
+
         return new ParquetReader(
                 Optional.ofNullable(fileMetaData.getCreatedBy()),
                 columnFields.build(),
@@ -174,123 +148,5 @@ public class ParquetUtils {
                 },
                 Optional.of(parquetPredicate),
                 Optional.empty());
-    }
-
-    public static List<Page> generateInputPages(List<Type> types, int positionsPerPage, int pageCount) {
-        ImmutableList.Builder<Page> pagesBuilder = ImmutableList.builder();
-        for (int i = 0; i < pageCount; i++) {
-            List<Block> blocks = types.stream()
-                    .map(type -> generateBlock(type, positionsPerPage))
-                    .collect(toImmutableList());
-            pagesBuilder.add(new Page(blocks.toArray(Block[]::new)));
-        }
-        return pagesBuilder.build();
-    }
-
-    public static List<Page> generateInputPages(List<Type> types, int positionsPerPage, List<?> data) {
-        ImmutableList.Builder<Page> pagesBuilder = ImmutableList.builder();
-        for (int i = 0; i < data.size(); i += positionsPerPage) {
-            int index = i;
-            List<Block> blocks = types.stream()
-                    .map(type -> generateBlock(type, data.subList(index, index + positionsPerPage)))
-                    .collect(toImmutableList());
-            pagesBuilder.add(new Page(blocks.toArray(Block[]::new)));
-        }
-        return pagesBuilder.build();
-    }
-
-    public static List<Integer> generateGroupSizes(int positionsCount) {
-        int maxGroupSize = 17;
-        int offset = 0;
-        ImmutableList.Builder<Integer> groupsBuilder = ImmutableList.builder();
-        while (offset < positionsCount) {
-            int remaining = positionsCount - offset;
-            int groupSize = Math.min(RANDOM.nextInt(maxGroupSize) + 1, remaining);
-            groupsBuilder.add(groupSize);
-            offset += groupSize;
-        }
-        return groupsBuilder.build();
-    }
-
-    public static RowBlock createRowBlock(Optional<boolean[]> rowIsNull, int positionCount) {
-        // TODO test with nested null fields and without nulls
-        Block[] fieldBlocks = new Block[4];
-        // no nulls block
-        fieldBlocks[0] = new LongArrayBlock(positionCount, rowIsNull, new long[positionCount]);
-        // no nulls with mayHaveNull block
-        fieldBlocks[1] = new LongArrayBlock(positionCount, rowIsNull.or(() -> Optional.of(new boolean[positionCount])), new long[positionCount]);
-        // all nulls block
-        boolean[] allNulls = new boolean[positionCount];
-        Arrays.fill(allNulls, true);
-        fieldBlocks[2] = new LongArrayBlock(positionCount, Optional.of(allNulls), new long[positionCount]);
-        // random nulls block
-        boolean[] valueIsNull = rowIsNull.map(boolean[]::clone).orElseGet(() -> new boolean[positionCount]);
-        for (int i = 0; i < positionCount; i++) {
-            valueIsNull[i] |= RANDOM.nextBoolean();
-        }
-        fieldBlocks[3] = new LongArrayBlock(positionCount, Optional.of(valueIsNull), new long[positionCount]);
-
-        return RowBlock.fromNotNullSuppressedFieldBlocks(positionCount, rowIsNull, fieldBlocks);
-    }
-
-    public static Block createArrayBlock(Optional<boolean[]> valueIsNull, int positionCount) {
-        int[] arrayOffset = generateOffsets(valueIsNull, positionCount);
-        return fromElementBlock(positionCount, valueIsNull, arrayOffset, createLongsBlockWithRandomNulls(arrayOffset[positionCount]));
-    }
-
-    public static Block createMapBlock(Optional<boolean[]> mapIsNull, int positionCount) {
-        int[] offsets = generateOffsets(mapIsNull, positionCount);
-        int entriesCount = offsets[positionCount];
-        Block keyBlock = new LongArrayBlock(entriesCount, Optional.empty(), new long[entriesCount]);
-        Block valueBlock = createLongsBlockWithRandomNulls(entriesCount);
-        return fromKeyValueBlock(mapIsNull, offsets, keyBlock, valueBlock, new MapType(BIGINT, BIGINT, TYPE_OPERATORS));
-    }
-
-    public static int[] generateOffsets(Optional<boolean[]> valueIsNull, int positionCount) {
-        int maxCardinality = 7; // array length or map size at the current position
-        int[] offsets = new int[positionCount + 1];
-        for (int position = 0; position < positionCount; position++) {
-            if (valueIsNull.isPresent() && valueIsNull.get()[position]) {
-                offsets[position + 1] = offsets[position];
-            } else {
-                offsets[position + 1] = offsets[position] + RANDOM.nextInt(maxCardinality);
-            }
-        }
-        return offsets;
-    }
-
-    private static Block createLongsBlockWithRandomNulls(int positionCount) {
-        boolean[] valueIsNull = new boolean[positionCount];
-        for (int i = 0; i < positionCount; i++) {
-            valueIsNull[i] = RANDOM.nextBoolean();
-        }
-        return new LongArrayBlock(positionCount, Optional.of(valueIsNull), new long[positionCount]);
-    }
-
-    private static Block generateBlock(Type type, int positions) {
-        BlockBuilder blockBuilder = type.createBlockBuilder(null, positions);
-        for (int i = 0; i < positions; i++) {
-            writeNativeValue(type, blockBuilder, (long) i);
-        }
-        return blockBuilder.build();
-    }
-
-    private static <T> Block generateBlock(Type type, List<T> data) {
-        BlockBuilder blockBuilder = type.createBlockBuilder(null, data.size());
-        for (T value : data) {
-            writeNativeValue(type, blockBuilder, value);
-        }
-        return blockBuilder.build();
-    }
-
-    public static DictionaryPage toTrinoDictionaryPage(org.apache.parquet.column.page.DictionaryPage dictionary) {
-        try {
-            return new DictionaryPage(
-                    Slices.wrappedBuffer(dictionary.getBytes().toByteArray()),
-                    dictionary.getDictionarySize(),
-                    getParquetEncoding(dictionary.getEncoding()));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 }
