@@ -40,13 +40,10 @@ public class ExampleSplitManager
         ExampleTableHandle tableHandle = (ExampleTableHandle) connectorTableHandle;
         ExampleTable table = exampleClient.getTable(tableHandle.getSchemaName(), tableHandle.getTableName());
 
-        // this can happen if table is removed during a query
-        //if (table == null) {
-        //throw new TableNotFoundException(tableHandle.toSchemaTableName());
-        //}
-
-        table = new ExampleTable(tableHandle.getTableName(), List.of(), List.of(URI.create("http://example.com:8080/abc")), null);
-
+        // This can happen if table is removed during a query
+        if (table == null) {
+            throw new TableNotFoundException(tableHandle.toSchemaTableName());
+        }
 
         return new ExampleSplitSource(table, tableHandle, dynamicFilter);
     }

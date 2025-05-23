@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.trino.spi.connector.ConnectorTableHandle;
 import io.trino.spi.connector.SchemaTableName;
 
+import java.util.Map;
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
@@ -26,6 +27,12 @@ public final class ExampleTableHandle
         implements ConnectorTableHandle {
     private final String schemaName;
     private final String tableName;
+
+    public void setConfigMap(Map<String, Object> configMap) {
+        this.configMap = configMap;
+    }
+
+    private Map<String,Object> configMap;
 
     @JsonCreator
     public ExampleTableHandle(
@@ -47,6 +54,11 @@ public final class ExampleTableHandle
 
     public SchemaTableName toSchemaTableName() {
         return new SchemaTableName(schemaName, tableName);
+    }
+
+    @JsonProperty
+    public Map<String, Object> getConfigMap() {
+        return configMap;
     }
 
     @Override

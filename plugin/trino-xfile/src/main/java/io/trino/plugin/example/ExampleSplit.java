@@ -20,8 +20,10 @@ import io.trino.spi.HostAddress;
 import io.trino.spi.connector.ConnectorSplit;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static io.airlift.slice.SizeOf.estimatedSizeOf;
 import static io.airlift.slice.SizeOf.instanceSize;
@@ -32,36 +34,21 @@ public class ExampleSplit
     private static final int INSTANCE_SIZE = instanceSize(ExampleSplit.class);
 
     private final String uri;
-    private final Map<String, String> properties;
-    private final boolean remotelyAccessible;
+    private final Map<String, String> splitInfo;
     private final List<HostAddress> addresses;
 
     @JsonCreator
     public ExampleSplit(
             @JsonProperty("uri") String uri,
-            @JsonProperty("properties") Map<String, String> properties) {
+            @JsonProperty("properties") Map<String, String> splitInfo) {
         this.uri = requireNonNull(uri, "uri is null");
-        this.properties = properties;
-
-        remotelyAccessible = true;
+        this.splitInfo = Objects.requireNonNullElseGet(splitInfo, HashMap::new);
         addresses = ImmutableList.of(HostAddress.fromUri(URI.create(uri)));
     }
 
     @JsonProperty
     public String getUri() {
         return uri;
-    }
-
-    @JsonProperty
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-
-    @Override
-    public boolean isRemotelyAccessible() {
-        // only http or https is remotely accessible
-        return remotelyAccessible;
     }
 
     @Override
@@ -71,7 +58,7 @@ public class ExampleSplit
 
     @Override
     public Map<String, String> getSplitInfo() {
-        return properties;
+        return splitInfo;
     }
 
     @Override

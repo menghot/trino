@@ -37,7 +37,7 @@ import static com.google.common.collect.Maps.uniqueIndex;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
-public class ExampleClient {
+public class ExampleClient implements IExampleClient {
     /**
      * SchemaName -> (TableName -> TableMetadata)
      */
@@ -49,10 +49,12 @@ public class ExampleClient {
         schemasSupplier = Suppliers.memoize(schemasSupplier(exampleTableList, config.getMetadata()));
     }
 
+    @Override
     public Set<String> getSchemaNames() {
         return requireNonNull(schemasSupplier.get()).keySet();
     }
 
+    @Override
     public Set<String> getTableNames(String schema) {
         requireNonNull(schema, "schema is null");
         Map<String, ExampleTable> tables = requireNonNull(schemasSupplier.get()).get(schema);
@@ -62,6 +64,7 @@ public class ExampleClient {
         return tables.keySet();
     }
 
+    @Override
     public ExampleTable getTable(String schema, String tableName) {
         requireNonNull(schema, "schema is null");
         requireNonNull(tableName, "tableName is null");

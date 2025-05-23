@@ -10,6 +10,8 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class ExampleSplitSource implements ConnectorSplitSource {
 
@@ -37,6 +39,7 @@ public class ExampleSplitSource implements ConnectorSplitSource {
         this.dynamicFilter = dynamicFilter;
         this.splits = new ArrayList<>();
         this.properties = new HashMap<>();
+        System.out.println(exampleTableHandle);
     }
 
     @Override
@@ -75,9 +78,13 @@ public class ExampleSplitSource implements ConnectorSplitSource {
         while (!dynamicFilter.isComplete()) {
             if (dynamicFilter.isAwaitable()) {
                 try {
-                    dynamicFilter.isBlocked().get();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
+                    dynamicFilter.isBlocked().get(60, TimeUnit.SECONDS);
+                } catch (ExecutionException e) {
+                    throw new RuntimeException("Dynamic filter execution error", e);
+                } catch (TimeoutException e) {
+                    throw new RuntimeException("Dynamic filter timeout", e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException("Dynamic filter interrupted", e);
                 }
             }
         }

@@ -13330,7 +13330,6 @@
     </dependencies>
 
     <profiles>
-
         <profile>
             <!-- Allow to run goals with an empty local Maven repository -->
             <id>disable-check-spi-dependencies</id>

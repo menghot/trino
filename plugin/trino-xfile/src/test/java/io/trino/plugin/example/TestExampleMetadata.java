@@ -14,7 +14,6 @@
 package io.trino.plugin.example;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 import io.trino.spi.TrinoException;

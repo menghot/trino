@@ -134,8 +134,20 @@ public class ExampleMetadata
     @Override
     public Optional<ConstraintApplicationResult<ConnectorTableHandle>> applyFilter(ConnectorSession session, ConnectorTableHandle handle, Constraint constraint) {
 
+        ExampleTableHandle exampleTableHandle = (ExampleTableHandle) handle;
 
-        return ConnectorMetadata.super.applyFilter(session, handle, constraint);
+        exampleTableHandle.setConfigMap(Map.of("name","simon", "lists",List.of("1", "2")));
+
+        if (constraint.predicate().isPresent()) {
+            System.out.println(constraint);
+        }
+
+        if (constraint.getSummary().getDomains().isPresent()) {
+            constraint.getSummary().getDomains().get();
+        }
+
+
+        return ConnectorMetadata.super.applyFilter(session, exampleTableHandle, constraint);
     }
 
     @Override

@@ -17,6 +17,9 @@ import io.airlift.json.JsonCodec;
 import io.airlift.testing.EquivalenceTester;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
+
 import static io.airlift.json.JsonCodec.jsonCodec;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,6 +34,22 @@ public class TestExampleTableHandle
         String json = codec.toJson(tableHandle);
         ExampleTableHandle copy = codec.fromJson(json);
         assertThat(copy).isEqualTo(tableHandle);
+    }
+
+
+    @Test
+    public void testJsonRoundTrip2()
+    {
+        JsonCodec<ExampleTableHandle> codec = jsonCodec(ExampleTableHandle.class);
+
+        ExampleTableHandle table = new ExampleTableHandle("schemaName", "tableName");
+        table.setConfigMap(Map.of("name","simon", "lists", List.of("p1","p2")));
+
+        String json = codec.toJson(table);
+        System.out.println(json);
+
+        ExampleTableHandle copy = codec.fromJson(json);
+        assertThat(copy).isEqualTo(table);
     }
 
     @Test
