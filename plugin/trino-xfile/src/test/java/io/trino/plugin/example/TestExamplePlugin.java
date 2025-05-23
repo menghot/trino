@@ -33,8 +33,8 @@ public class TestExamplePlugin {
             try {
                 URL metadataUrl = Resources.getResource(TestExampleClient.class, "/example-data/example-metadata-http.json");
                 queryRunner.installPlugin(new ExamplePlugin());
-                queryRunner.createCatalog("example", "example_http",
-                        ImmutableMap.of("metadata-uri", metadataUrl.toURI().toString()));
+                queryRunner.createCatalog("example", "example_http",ImmutableMap.of("metadata-uri", metadataUrl.toURI().toString()));
+                queryRunner.createCatalog("example_simon", "example_http",ImmutableMap.of("metadata-uri", metadataUrl.toURI().toString()));
             } catch (Throwable e) {
                 Closables.closeAllSuppress(e, queryRunner);
                 throw e;

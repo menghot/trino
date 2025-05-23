@@ -13,8 +13,10 @@
  */
 package io.trino.plugin.example;
 
+import com.google.inject.Binder;
 import com.google.inject.Injector;
 import io.airlift.bootstrap.Bootstrap;
+import io.airlift.configuration.AbstractConfigurationAwareModule;
 import io.airlift.json.JsonModule;
 import io.trino.plugin.base.TypeDeserializerModule;
 import io.trino.spi.connector.Connector;
@@ -42,6 +44,7 @@ public class ExampleConnectorFactory
         Bootstrap app = new Bootstrap(
                 new JsonModule(),
                 new TypeDeserializerModule(context.getTypeManager()),
+                new ExampleFileSystemModule(catalogName),
                 new ExampleModule());
 
         Injector injector = app
@@ -50,5 +53,19 @@ public class ExampleConnectorFactory
                 .initialize();
 
         return injector.getInstance(ExampleConnector.class);
+    }
+
+    public static class ExampleFileSystemModule extends AbstractConfigurationAwareModule {
+        private  final String catalogName;
+
+        public ExampleFileSystemModule(String catalogName) {
+            this.catalogName = requireNonNull(catalogName, "catalogName is null");
+            System.out.println(this.catalogName);
+        }
+
+        @Override
+        protected void setup(Binder binder) {
+            System.out.println(catalogName);
+        }
     }
 }

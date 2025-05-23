@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 import com.google.inject.Inject;
+import io.trino.filesystem.TrinoFileSystem;
 import io.trino.parquet.ParquetDataSource;
 import io.trino.parquet.ParquetReaderOptions;
 import io.trino.parquet.metadata.FileMetadata;
@@ -85,8 +86,48 @@ public class ExampleMetadata
     }
 
     @Override
-    public ConnectorTableMetadata getTableMetadata(ConnectorSession session, ConnectorTableHandle table) {
-        return getTableMetadata(((ExampleTableHandle) table).toSchemaTableName());
+    public ConnectorTableMetadata getTableMetadata(ConnectorSession session, ConnectorTableHandle tableHandle) {
+
+        SchemaTableName tableName = ((ExampleTableHandle) tableHandle).toSchemaTableName();
+        if (tableName.getTableName().endsWith(".parquet")) {
+            try {
+                ParquetDataSource dataSource = new LocalParquetDataSource(
+                        new File(Resources.getResource("numbers.parquet").toURI()),
+                        new ParquetReaderOptions());
+
+                ParquetMetadata parquetMetadata = MetadataReader.readFooter(dataSource, Optional.empty());
+                System.out.println(parquetMetadata);
+
+                FileMetadata fileMetaData = parquetMetadata.getFileMetaData();
+                MessageType fileSchema = fileMetaData.getSchema();
+
+                MessageColumnIO messageColumnIO = getColumnIO(fileSchema, fileSchema);
+                System.out.println(messageColumnIO);
+
+                ImmutableList.Builder<ColumnMetadata> columnsMetadata = ImmutableList.builder();
+                for (org.apache.parquet.schema.Type field : fileSchema.getFields()) {
+                    String name = field.getName();
+                    Type trinoType = convertParquetTypeToTrino(field);
+                    columnsMetadata.add(new ColumnMetadata(name, trinoType));
+                }
+
+                return new ConnectorTableMetadata(tableName, columnsMetadata.build());
+
+            } catch (URISyntaxException | IOException _) {
+
+            }
+        }
+
+        if (!listSchemaNames().contains(tableName.getSchemaName())) {
+            return null;
+        }
+
+        ExampleTable table = exampleClient.getTable(tableName.getSchemaName(), tableName.getTableName());
+        if (table == null) {
+            return null;
+        }
+
+        return new ConnectorTableMetadata(tableName, table.getColumnsMetadata());
     }
 
     @Override
@@ -99,6 +140,8 @@ public class ExampleMetadata
     @Override
     public List<SchemaTableName> listTables(ConnectorSession session, Optional<String> optionalSchemaName) {
         // TODO Auto discovery parquet files, csv, excel files
+
+        TrinoFileSystem trinoFileSystem;
 
         Set<String> schemaNames = optionalSchemaName.map(ImmutableSet::of)
                 .orElseGet(() -> ImmutableSet.copyOf(exampleClient.getSchemaNames()));
@@ -150,58 +193,14 @@ public class ExampleMetadata
         requireNonNull(prefix, "prefix is null");
         ImmutableMap.Builder<SchemaTableName, List<ColumnMetadata>> columns = ImmutableMap.builder();
         for (SchemaTableName tableName : listTables(session, prefix)) {
-            ConnectorTableMetadata tableMetadata = getTableMetadata(tableName);
-            // table can disappear during listing operation
-            if (tableMetadata != null) {
-                columns.put(tableName, tableMetadata.getColumns());
+            ExampleTable table = exampleClient.getTable(tableName.getSchemaName(), tableName.getTableName());
+            if (table == null) {
+                return null;
             }
+            ConnectorTableMetadata tableMetadata = new ConnectorTableMetadata(tableName, table.getColumnsMetadata());
+            columns.put(tableName, tableMetadata.getColumns());
         }
         return columns.buildOrThrow();
-    }
-
-
-    private ConnectorTableMetadata getTableMetadata(SchemaTableName tableName) {
-        System.out.println(tableName);
-
-        if (tableName.getTableName().endsWith(".parquet")) {
-            try {
-                ParquetDataSource dataSource = new LocalParquetDataSource(
-                        new File(Resources.getResource("numbers.parquet").toURI()),
-                        new ParquetReaderOptions());
-
-                ParquetMetadata parquetMetadata = MetadataReader.readFooter(dataSource, Optional.empty());
-                System.out.println(parquetMetadata);
-
-                FileMetadata fileMetaData = parquetMetadata.getFileMetaData();
-                MessageType fileSchema = fileMetaData.getSchema();
-
-                MessageColumnIO messageColumnIO = getColumnIO(fileSchema, fileSchema);
-                System.out.println(messageColumnIO);
-
-                ImmutableList.Builder<ColumnMetadata> columnsMetadata = ImmutableList.builder();
-                for (org.apache.parquet.schema.Type field : fileSchema.getFields()) {
-                    String name = field.getName();
-                    Type trinoType = convertParquetTypeToTrino(field);
-                    columnsMetadata.add(new ColumnMetadata(name, trinoType));
-                }
-
-                return new ConnectorTableMetadata(tableName, columnsMetadata.build());
-
-            } catch (URISyntaxException | IOException e) {
-
-            }
-        }
-
-        if (!listSchemaNames().contains(tableName.getSchemaName())) {
-            return null;
-        }
-
-        ExampleTable table = exampleClient.getTable(tableName.getSchemaName(), tableName.getTableName());
-        if (table == null) {
-            return null;
-        }
-
-        return new ConnectorTableMetadata(tableName, table.getColumnsMetadata());
     }
 
     private List<SchemaTableName> listTables(ConnectorSession session, SchemaTablePrefix prefix) {

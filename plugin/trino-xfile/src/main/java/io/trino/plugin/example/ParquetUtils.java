@@ -14,54 +14,42 @@
 package io.trino.plugin.example;
 
 import com.google.common.collect.ImmutableList;
-import io.airlift.slice.Slice;
 import io.airlift.slice.Slices;
 import io.trino.memory.context.AggregatedMemoryContext;
 import io.trino.parquet.Column;
-import io.trino.parquet.DictionaryPage;
 import io.trino.parquet.ParquetDataSource;
 import io.trino.parquet.ParquetReaderOptions;
+import io.trino.parquet.ParquetWriteValidation;
 import io.trino.parquet.metadata.FileMetadata;
 import io.trino.parquet.metadata.ParquetMetadata;
 import io.trino.parquet.predicate.TupleDomainParquetPredicate;
 import io.trino.parquet.reader.ParquetReader;
 import io.trino.parquet.reader.RowGroupInfo;
-import io.trino.parquet.writer.ParquetSchemaConverter;
-import io.trino.parquet.writer.ParquetWriter;
-import io.trino.parquet.writer.ParquetWriterOptions;
 import io.trino.spi.Page;
 import io.trino.spi.block.Block;
-import io.trino.spi.block.BlockBuilder;
-import io.trino.spi.block.LongArrayBlock;
-import io.trino.spi.block.RowBlock;
+import io.trino.spi.block.VariableWidthBlockBuilder;
+import io.trino.spi.connector.SourcePage;
 import io.trino.spi.predicate.TupleDomain;
-import io.trino.spi.type.MapType;
 import io.trino.spi.type.Type;
 import io.trino.spi.type.TypeOperators;
 import org.apache.parquet.column.ColumnDescriptor;
-import org.apache.parquet.format.CompressionCodec;
 import org.apache.parquet.io.ColumnIO;
 import org.apache.parquet.io.MessageColumnIO;
 import org.apache.parquet.schema.MessageType;
 import org.joda.time.DateTimeZone;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.function.Function;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.throwIfUnchecked;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.trino.memory.context.AggregatedMemoryContext.newSimpleAggregatedMemoryContext;
 import static io.trino.parquet.ParquetTypeUtils.*;
 import static io.trino.parquet.predicate.PredicateUtils.buildPredicate;
 import static io.trino.parquet.predicate.PredicateUtils.getFilteredRowGroups;
-import static io.trino.spi.block.ArrayBlock.fromElementBlock;
-import static io.trino.spi.block.MapBlock.fromKeyValueBlock;
-import static io.trino.spi.type.BigintType.BIGINT;
-import static io.trino.spi.type.TypeUtils.writeNativeValue;
 import static java.util.Locale.ENGLISH;
 import static org.joda.time.DateTimeZone.UTC;
 
@@ -133,7 +121,7 @@ public class ParquetUtils {
                 1000,
                 options);
 
-        return new ParquetReader(
+        return new ExampleParquetReader(
                 Optional.ofNullable(fileMetaData.getCreatedBy()),
                 columnFields.build(),
                 false,
@@ -148,5 +136,41 @@ public class ParquetUtils {
                 },
                 Optional.of(parquetPredicate),
                 Optional.empty());
+    }
+
+    public static class ExampleParquetReader extends ParquetReader {
+
+        public ExampleParquetReader(Optional<String> fileCreatedBy, List<Column> columnFields, boolean appendRowNumberColumn, List<RowGroupInfo> rowGroups, ParquetDataSource dataSource, DateTimeZone timeZone, AggregatedMemoryContext memoryContext, ParquetReaderOptions options, Function<Exception, RuntimeException> exceptionTransform, Optional<TupleDomainParquetPredicate> parquetPredicate, Optional<ParquetWriteValidation> writeValidation) throws IOException {
+            super(fileCreatedBy, columnFields, appendRowNumberColumn, rowGroups, dataSource, timeZone, memoryContext, options, exceptionTransform, parquetPredicate, writeValidation);
+        }
+
+        @Override
+        public SourcePage nextPage() throws IOException {
+
+            SourcePage page = super.nextPage();
+            if (page == null) {
+                return null;
+            }
+
+            Page p = page.getPage();
+            Block[] blocks = new Block[p.getChannelCount() + 4];
+            for (int i = 0; i < p.getChannelCount(); i++) {
+                blocks[i] = p.getBlock(i);
+            }
+
+            String value = String.valueOf(System.currentTimeMillis());
+            VariableWidthBlockBuilder builder = new VariableWidthBlockBuilder(null, p.getPositionCount(), value.length());
+            for (int i = 0; i < p.getPositionCount(); i++) {
+                builder.writeEntry(Slices.utf8Slice(value));
+            }
+
+            // Add additional blocks for hidden columns
+            blocks[p.getChannelCount()] = builder.build();     // __data_uri__
+            blocks[p.getChannelCount() + 1] = builder.build(); // __params__
+            blocks[p.getChannelCount() + 2] = builder.build(); // __http_header__
+            blocks[p.getChannelCount() + 3] = builder.build(); // __http_body__
+
+            return SourcePage.create(new Page(p.getPositionCount(), blocks));
+        }
     }
 }
