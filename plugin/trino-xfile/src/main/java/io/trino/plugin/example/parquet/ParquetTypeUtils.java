@@ -1,4 +1,4 @@
-package io.trino.plugin.example;
+package io.trino.plugin.example.parquet;
 
 import io.trino.spi.type.*;
 import org.apache.parquet.schema.GroupType;

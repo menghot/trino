@@ -20,6 +20,8 @@ import io.trino.parquet.metadata.ParquetMetadata;
 import io.trino.parquet.reader.MetadataReader;
 import io.trino.parquet.reader.ParquetReader;
 //import io.trino.plugin.hive.avro.AvroPageSource;
+import io.trino.plugin.example.parquet.ParquetFileDataSource;
+import io.trino.plugin.example.parquet.ParquetPageSource;
 import io.trino.spi.connector.*;
 import io.trino.spi.type.Type;
 
@@ -30,7 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.trino.memory.context.AggregatedMemoryContext.newSimpleAggregatedMemoryContext;
-import static io.trino.plugin.example.ParquetUtils.createParquetReader;
+import static io.trino.plugin.example.parquet.ParquetUtils.createParquetReader;
 import static java.util.Objects.requireNonNull;
 
 public class ExamplePageSourceProvider
@@ -78,7 +80,7 @@ public class ExamplePageSourceProvider
 
     private static ParquetPageSource getParquetPageSource(List<Type> types, List<String> columnNames) {
         try {
-            ParquetDataSource dataSource = new LocalParquetDataSource(
+            ParquetDataSource dataSource = new ParquetFileDataSource(
                     new File(Resources.getResource("numbers.parquet").toURI()),
                     new ParquetReaderOptions());
 

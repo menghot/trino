@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.trino.plugin.example;
+package io.trino.plugin.example.parquet;
 
 import io.trino.parquet.AbstractParquetDataSource;
 import io.trino.parquet.ParquetDataSourceId;
@@ -22,11 +22,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-public class LocalParquetDataSource
+public class ParquetFileDataSource
         extends AbstractParquetDataSource {
     private final RandomAccessFile input;
 
-    public LocalParquetDataSource(File path, ParquetReaderOptions options)
+    public ParquetFileDataSource(File path, ParquetReaderOptions options)
             throws FileNotFoundException {
         super(new ParquetDataSourceId(path.getPath()), path.length(), options);
         this.input = new RandomAccessFile(path, "r");

@@ -11,13 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.trino.plugin.example;
+package io.trino.plugin.example.parquet;
 
-import io.trino.parquet.ParquetCorruptionException;
 import io.trino.parquet.ParquetDataSourceId;
 import io.trino.parquet.reader.ParquetReader;
 import io.trino.spi.ErrorCode;
-import io.trino.spi.ErrorCodeSupplier;
 import io.trino.spi.ErrorType;
 import io.trino.spi.TrinoException;
 import io.trino.spi.connector.ConnectorPageSource;
