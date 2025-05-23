@@ -41,21 +41,21 @@ public class ExampleClient {
     /**
      * SchemaName -> (TableName -> TableMetadata)
      */
-    private final Supplier<Map<String, Map<String, ExampleTable>>> schemas;
+    private final Supplier<Map<String, Map<String, ExampleTable>>> schemasSupplier;
 
     @Inject
-    public ExampleClient(ExampleConfig config, JsonCodec<Map<String, List<ExampleTable>>> catalogCodec) {
-        requireNonNull(catalogCodec, "catalogCodec is null");
-        schemas = Suppliers.memoize(schemasSupplier(catalogCodec, config.getMetadata()));
+    public ExampleClient(ExampleConfig config, JsonCodec<Map<String, List<ExampleTable>>> exampleTableList) {
+        requireNonNull(exampleTableList, "exampleTableList is null");
+        schemasSupplier = Suppliers.memoize(schemasSupplier(exampleTableList, config.getMetadata()));
     }
 
     public Set<String> getSchemaNames() {
-        return schemas.get().keySet();
+        return requireNonNull(schemasSupplier.get()).keySet();
     }
 
     public Set<String> getTableNames(String schema) {
         requireNonNull(schema, "schema is null");
-        Map<String, ExampleTable> tables = schemas.get().get(schema);
+        Map<String, ExampleTable> tables = requireNonNull(schemasSupplier.get()).get(schema);
         if (tables == null) {
             return ImmutableSet.of();
         }
@@ -65,12 +65,14 @@ public class ExampleClient {
     public ExampleTable getTable(String schema, String tableName) {
         requireNonNull(schema, "schema is null");
         requireNonNull(tableName, "tableName is null");
-        Map<String, ExampleTable> tables = schemas.get().get(schema);
+        Map<String, ExampleTable> tables = schemasSupplier.get().get(schema);
         if (tables == null) {
             return null;
         }
         return tables.get(tableName);
     }
+
+    //============================================================
 
     private static Supplier<Map<String, Map<String, ExampleTable>>> schemasSupplier(JsonCodec<Map<String, List<ExampleTable>>> catalogCodec, URI metadataUri) {
         return () -> {
@@ -101,7 +103,7 @@ public class ExampleClient {
     private static Function<ExampleTable, ExampleTable> tableUriResolver(URI baseUri) {
         return table -> {
             List<URI> sources = ImmutableList.copyOf(transform(table.getSources(), baseUri::resolve));
-            return new ExampleTable(table.getName(), table.getColumns(), sources);
+            return new ExampleTable(table.getName(), table.getColumns(), sources, null);
         };
     }
 }

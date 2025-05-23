@@ -20,6 +20,7 @@ import io.trino.spi.connector.ColumnMetadata;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -30,12 +31,15 @@ public class ExampleTable {
     private final List<ExampleColumn> columns;
     private final List<ColumnMetadata> columnsMetadata;
     private final List<URI> sources;
+    private final Map<String,String> properties;
 
     @JsonCreator
     public ExampleTable(
             @JsonProperty("name") String name,
             @JsonProperty("columns") List<ExampleColumn> columns,
-            @JsonProperty("sources") List<URI> sources) {
+            @JsonProperty("sources") List<URI> sources,
+            @JsonProperty("properties") Map<String, String> properties) {
+        this.properties = properties;
         checkArgument(!isNullOrEmpty(name), "name is null or is empty");
         this.name = requireNonNull(name, "name is null");
         this.columns = ImmutableList.copyOf(requireNonNull(columns, "columns is null"));
@@ -65,5 +69,9 @@ public class ExampleTable {
 
     public List<ColumnMetadata> getColumnsMetadata() {
         return columnsMetadata;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
     }
 }

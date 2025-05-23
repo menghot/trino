@@ -45,7 +45,7 @@ public class ExampleSplitManager
         //throw new TableNotFoundException(tableHandle.toSchemaTableName());
         //}
 
-        table = new ExampleTable(tableHandle.getTableName(), List.of(), List.of(URI.create("http://example.com:8080/abc")));
+        table = new ExampleTable(tableHandle.getTableName(), List.of(), List.of(URI.create("http://example.com:8080/abc")), null);
 
 
         return new ExampleSplitSource(table, tableHandle, dynamicFilter);
