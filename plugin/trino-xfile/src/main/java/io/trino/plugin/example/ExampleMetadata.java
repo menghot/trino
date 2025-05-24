@@ -29,6 +29,7 @@ import io.trino.plugin.example.parquet.ParquetFileDataSource;
 import io.trino.spi.TrinoException;
 import io.trino.spi.connector.*;
 import io.trino.spi.predicate.Domain;
+import io.trino.spi.statistics.TableStatistics;
 import io.trino.spi.type.Type;
 import io.trino.spi.type.VarcharType;
 import org.apache.parquet.io.MessageColumnIO;
@@ -142,10 +143,7 @@ public class ExampleMetadata
 
     @Override
     public Optional<ConstraintApplicationResult<ConnectorTableHandle>> applyFilter(ConnectorSession session, ConnectorTableHandle handle, Constraint constraint) {
-
         ExampleTableHandle exampleTableHandle = (ExampleTableHandle) handle;
-
-
         if (constraint.getSummary().getDomains().isPresent()) {
             constraint.getSummary().getDomains().get().forEach((ch, domain) -> {
                 ExampleColumnHandle columnHandle = (ExampleColumnHandle) ch;
@@ -249,5 +247,10 @@ public class ExampleMetadata
     @Override
     public ColumnMetadata getColumnMetadata(ConnectorSession session, ConnectorTableHandle tableHandle, ColumnHandle columnHandle) {
         return ((ExampleColumnHandle) columnHandle).getColumnMetadata();
+    }
+
+    @Override
+    public TableStatistics getTableStatistics(ConnectorSession session, ConnectorTableHandle tableHandle) {
+        return ConnectorMetadata.super.getTableStatistics(session, tableHandle);
     }
 }

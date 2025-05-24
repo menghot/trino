@@ -1,17 +1,20 @@
 package io.trino.plugin.example;
 
+import io.airlift.json.JsonCodec;
 import io.airlift.slice.Slice;
-import io.trino.spi.connector.ConnectorSplit;
-import io.trino.spi.connector.ConnectorSplitSource;
-import io.trino.spi.connector.DynamicFilter;
-import io.trino.spi.connector.FixedSplitSource;
+import io.trino.spi.connector.*;
+import io.trino.spi.predicate.Domain;
+import io.trino.spi.type.BigintType;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static io.airlift.json.JsonCodec.jsonCodec;
 
 public class ExampleSplitSource implements ConnectorSplitSource {
 
@@ -21,13 +24,7 @@ public class ExampleSplitSource implements ConnectorSplitSource {
 
     private final Map<String, String> properties;
     private final ExampleTable table;
-
-    private final Set<String> internalColumns = Set.of(
-            ExampleInternalColumn.HTTP_URL.getName(),
-            ExampleInternalColumn.HTTP_HEADER.getName(),
-            ExampleInternalColumn.HTTP_BODY.getName(),
-            ExampleInternalColumn.PARAMS.getName()
-    );
+    private final ExampleTableHandle exampleTableHandle;
 
     public ExampleSplitSource(
             ExampleTable table,
@@ -38,6 +35,7 @@ public class ExampleSplitSource implements ConnectorSplitSource {
         this.dynamicFilter = dynamicFilter;
         this.splits = new ArrayList<>();
         this.properties = new HashMap<>();
+        this.exampleTableHandle = exampleTableHandle;
         System.out.println(exampleTableHandle);
     }
 
@@ -59,7 +57,6 @@ public class ExampleSplitSource implements ConnectorSplitSource {
         }
     }
 
-
     private void extractDynamicFilter() {
         if (dynamicFilter == null) {
             return;
@@ -79,18 +76,30 @@ public class ExampleSplitSource implements ConnectorSplitSource {
         }
 
         if (dynamicFilter.getCurrentPredicate().getDomains().isPresent()) {
-            dynamicFilter.getCurrentPredicate().getDomains().get().forEach((handle, domain) -> {
-                if (handle instanceof ExampleColumnHandle columnHandle
-                        && columnHandle.getColumnName().equals(ExampleInternalColumn.DATA_URI.getName())) {
-                    domain.getValues().getRanges().getOrderedRanges().iterator().forEachRemaining(r -> {
-                        if (r.isSingleValue() && r.getSingleValue() instanceof Slice s) {
-                            splits.add(new ExampleSplit(s.toStringUtf8(), properties));
-                        } else {
-                            throw new RuntimeException("$data_uri is not a single value or string value");
-                        }
-                    });
+            dynamicFilter.getCurrentPredicate().getDomains().get().forEach(this::accept);
+        }
+    }
+
+    private void accept(ColumnHandle columnHandle, Domain domain) {
+        ExampleColumnHandle exampleColumnHandle = (ExampleColumnHandle) columnHandle;
+        if (domain.isSingleValue()) {
+            if (domain.getSingleValue() instanceof Slice s) {
+                exampleTableHandle.getFilterMap().putIfAbsent(exampleColumnHandle.getColumnName(), s.toStringUtf8());
+            }
+        } else {
+            List<Object> values = new ArrayList<>();
+            domain.getValues().getRanges().getOrderedRanges().iterator().forEachRemaining(r -> {
+                if (r.isSingleValue()) {
+                    if (r.getSingleValue() instanceof Slice s) {
+                        values.add(s.toStringUtf8());
+                    } else {
+                        values.add(r.getSingleValue());
+                    }
                 }
             });
+            exampleTableHandle.getFilterMap().putIfAbsent(exampleColumnHandle.getColumnName(), values);
+            JsonCodec<ExampleTableHandle> codec = jsonCodec(ExampleTableHandle.class);
+            System.out.println(codec.toJson(exampleTableHandle));
         }
     }
 
