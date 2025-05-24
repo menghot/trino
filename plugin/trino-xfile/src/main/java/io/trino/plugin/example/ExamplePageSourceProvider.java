@@ -52,28 +52,31 @@ public class ExamplePageSourceProvider
             List<ColumnHandle> columns,
             DynamicFilter dynamicFilter) {
 
-        // TODO: Create ParquetPageSource if is parquet file,
-        if (split.getSplitInfo().containsKey("1")) {
+        ExampleSplit exampleSplit = (ExampleSplit) split;
+        ExampleTableHandle tableHandle = (ExampleTableHandle) table;
 
-            List<String> columnNames = columns.stream().map((columnHandle) -> {
-                ExampleColumnHandle c = (ExampleColumnHandle) columnHandle;
-                return c.getColumnName();
-            }).toList();
-
-            List<Type> types = columns.stream().map((columnHandle) -> {
-                ExampleColumnHandle c = (ExampleColumnHandle) columnHandle;
-                return c.getColumnType();
-            }).toList();
-
-            return getParquetPageSource(types, columnNames);
+        if ( tableHandle.getTableName().endsWith(".parquet")) {
+            return getParquetPageSource(columns);
         }
 
-        //
-        return new RecordPageSource(recordSetProvider.getRecordSet(transaction, session, split, table, columns));
+        return new RecordPageSource(recordSetProvider.getRecordSet(transaction, session, exampleSplit, tableHandle, columns));
     }
 
-    private static ParquetPageSource getParquetPageSource(List<Type> types, List<String> columnNames) {
+    private static ParquetPageSource getParquetPageSource(List<ColumnHandle> columns) {
+
+        List<String> columnNames = columns.stream().map((columnHandle) -> {
+            ExampleColumnHandle c = (ExampleColumnHandle) columnHandle;
+            return c.getColumnName();
+        }).toList();
+
+        List<Type> types = columns.stream().map((columnHandle) -> {
+            ExampleColumnHandle c = (ExampleColumnHandle) columnHandle;
+            return c.getColumnType();
+        }).toList();
+
         try {
+
+            //TODO build datasource from schema properties?
             ParquetDataSource dataSource = new ParquetFileDataSource(
                     new File(Resources.getResource("numbers.parquet").toURI()),
                     new ParquetReaderOptions());
