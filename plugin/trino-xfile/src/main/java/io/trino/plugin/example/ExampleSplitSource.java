@@ -36,7 +36,6 @@ public class ExampleSplitSource implements ConnectorSplitSource {
         this.splits = new ArrayList<>();
         this.properties = new HashMap<>();
         this.exampleTableHandle = exampleTableHandle;
-        System.out.println(exampleTableHandle);
     }
 
     @Override
@@ -64,7 +63,7 @@ public class ExampleSplitSource implements ConnectorSplitSource {
         while (!dynamicFilter.isComplete()) {
             if (dynamicFilter.isAwaitable()) {
                 try {
-                    dynamicFilter.isBlocked().get(60, TimeUnit.SECONDS);
+                    dynamicFilter.isBlocked().get(180, TimeUnit.SECONDS);
                 } catch (ExecutionException e) {
                     throw new RuntimeException("Dynamic filter execution error", e);
                 } catch (TimeoutException e) {
