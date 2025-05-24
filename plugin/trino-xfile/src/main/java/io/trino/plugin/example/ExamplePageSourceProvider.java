@@ -85,8 +85,10 @@ public class ExamplePageSourceProvider
             ParquetReader reader = createParquetReader(dataSource, parquetMetadata, newSimpleAggregatedMemoryContext(), types, columnNames);
 
             return new ParquetPageSource(reader);
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("File URI syntax error", e);
         }
     }
 }

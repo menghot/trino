@@ -16,6 +16,9 @@ package io.trino.plugin.example;
 import com.google.inject.Inject;
 import io.trino.spi.connector.*;
 
+import java.net.URI;
+import java.util.List;
+
 import static java.util.Objects.requireNonNull;
 
 public class ExampleSplitManager
@@ -36,6 +39,12 @@ public class ExampleSplitManager
             Constraint constraint) {
         ExampleTableHandle tableHandle = (ExampleTableHandle) connectorTableHandle;
         ExampleTable table = exampleClient.getTable(tableHandle.getSchemaName(), tableHandle.getTableName());
+
+
+        //
+        if (tableHandle.getTableName().endsWith(".parquet")) {
+            table = new ExampleTable(tableHandle.getTableName(), List.of(), List.of(URI.create("http://example.com:8080/abc")), null);
+        }
 
         // This can happen if table is removed during a query
         if (table == null) {
