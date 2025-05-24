@@ -31,7 +31,7 @@ public class ExampleTable {
     private final List<ExampleColumn> columns;
     private final List<ColumnMetadata> columnsMetadata;
     private final List<URI> sources;
-    private final Map<String,String> properties;
+    private final Map<String, String> properties;
 
     @JsonCreator
     public ExampleTable(

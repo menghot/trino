@@ -36,14 +36,12 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.CONCURRENT;
 
 @TestInstance(PER_CLASS)
 @Execution(CONCURRENT)
-public class TestExampleRecordSetProvider
-{
+public class TestExampleRecordSetProvider {
     private ExampleHttpServer exampleHttpServer;
     private String dataUri;
 
     @Test
-    public void testGetRecordSet()
-    {
+    public void testGetRecordSet() {
         ConnectorTableHandle tableHandle = new ExampleTableHandle("schema", "table");
         ExampleRecordSetProvider recordSetProvider = new ExampleRecordSetProvider();
         RecordSet recordSet = recordSetProvider.getRecordSet(ExampleTransactionHandle.INSTANCE, SESSION, new ExampleSplit(dataUri, null), tableHandle, ImmutableList.of(
@@ -74,16 +72,14 @@ public class TestExampleRecordSetProvider
     //
 
     @BeforeAll
-    public void setUp()
-    {
+    public void setUp() {
         exampleHttpServer = new ExampleHttpServer(0);
         dataUri = exampleHttpServer.resolve("/example-data/numbers-2.csv").toString();
         System.out.println(dataUri);
     }
 
     @AfterAll
-    public void tearDown()
-    {
+    public void tearDown() {
         if (exampleHttpServer != null) {
             exampleHttpServer.stop();
         }

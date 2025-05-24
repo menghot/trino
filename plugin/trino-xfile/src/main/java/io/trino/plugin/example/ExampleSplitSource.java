@@ -19,7 +19,6 @@ public class ExampleSplitSource implements ConnectorSplitSource {
     private final DynamicFilter dynamicFilter;
     private final List<ConnectorSplit> splits;
 
-    //Split properties
     private final Map<String, String> properties;
     private final ExampleTable table;
 
@@ -45,15 +44,8 @@ public class ExampleSplitSource implements ConnectorSplitSource {
     @Override
     public synchronized CompletableFuture<ConnectorSplitBatch> getNextBatch(int maxSize) {
         if (source == null) {
-
-            extractSplitsFromDynamicFilter();
-
-            // No split generate from dynamic filter and constraint.
-            // Loop "location" from table properties
-            if (splits.isEmpty()) {
-                extractSplitFromDefaultTableProperties();
-            }
-
+            extractDynamicFilter();
+            extractFilterFromTableProperties();
             Collections.shuffle(splits);
             source = new FixedSplitSource(splits);
         }
@@ -61,17 +53,14 @@ public class ExampleSplitSource implements ConnectorSplitSource {
     }
 
 
-    private void extractSplitFromDefaultTableProperties() {
+    private void extractFilterFromTableProperties() {
         for (URI uri : table.getSources()) {
             splits.add(new ExampleSplit(uri.toString(), properties));
         }
     }
 
 
-    // Support dynamic filter for "$data_uri", only below example supported
-    // 1. "$data_uri" in (select path * from x)
-    // 2. "$data_uri" = (select path * from x )
-    private void extractSplitsFromDynamicFilter() {
+    private void extractDynamicFilter() {
         if (dynamicFilter == null) {
             return;
         }

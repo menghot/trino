@@ -136,7 +136,7 @@ public class ExampleMetadata
 
         ExampleTableHandle exampleTableHandle = (ExampleTableHandle) handle;
 
-        exampleTableHandle.setConfigMap(Map.of("name","simon", "lists",List.of("1", "2")));
+        exampleTableHandle.setFilterMap(Map.of("name", "simon", "lists", List.of("1", "2")));
 
         if (constraint.predicate().isPresent()) {
             System.out.println(constraint);

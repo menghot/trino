@@ -21,13 +21,11 @@ import org.junit.jupiter.api.Test;
 import static io.airlift.json.JsonCodec.jsonCodec;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TestExampleSplit
-{
+public class TestExampleSplit {
     private final ExampleSplit split = new ExampleSplit("http://127.0.0.1/test.file", null);
 
     @Test
-    public void testAddresses()
-    {
+    public void testAddresses() {
         // http split with default port
         ExampleSplit httpSplit = new ExampleSplit("http://example.com/example", null);
         assertThat(httpSplit.getAddresses()).isEqualTo(ImmutableList.of(HostAddress.fromString("example.com")));
@@ -50,8 +48,7 @@ public class TestExampleSplit
     }
 
     @Test
-    public void testJsonRoundTrip()
-    {
+    public void testJsonRoundTrip() {
         JsonCodec<ExampleSplit> codec = jsonCodec(ExampleSplit.class);
         String json = codec.toJson(split);
         ExampleSplit copy = codec.fromJson(json);

@@ -56,7 +56,7 @@ public class ExampleConnectorFactory
     }
 
     public static class ExampleFileSystemModule extends AbstractConfigurationAwareModule {
-        private  final String catalogName;
+        private final String catalogName;
 
         public ExampleFileSystemModule(String catalogName) {
             this.catalogName = requireNonNull(catalogName, "catalogName is null");

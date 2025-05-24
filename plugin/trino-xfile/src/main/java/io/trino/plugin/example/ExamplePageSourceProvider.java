@@ -19,7 +19,6 @@ import io.trino.parquet.ParquetReaderOptions;
 import io.trino.parquet.metadata.ParquetMetadata;
 import io.trino.parquet.reader.MetadataReader;
 import io.trino.parquet.reader.ParquetReader;
-//import io.trino.plugin.hive.avro.AvroPageSource;
 import io.trino.plugin.example.parquet.ParquetFileDataSource;
 import io.trino.plugin.example.parquet.ParquetPageSource;
 import io.trino.spi.connector.*;

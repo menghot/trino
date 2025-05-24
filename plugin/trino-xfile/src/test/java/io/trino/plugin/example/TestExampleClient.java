@@ -26,12 +26,10 @@ import static io.trino.spi.type.BigintType.BIGINT;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TestExampleClient
-{
+public class TestExampleClient {
     @Test
     public void testMetadata()
-            throws Exception
-    {
+            throws Exception {
         URL metadataUrl = Resources.getResource(TestExampleClient.class, "/example-data/example-metadata.json");
         assertThat(metadataUrl)
                 .describedAs("metadataUrl is null")

@@ -34,14 +34,12 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.CONCURRENT;
 
 @TestInstance(PER_CLASS)
 @Execution(CONCURRENT)
-public class TestExampleRecordSet
-{
+public class TestExampleRecordSet {
     private ExampleHttpServer exampleHttpServer;
     private String dataUri;
 
     @Test
-    public void testGetColumnTypes()
-    {
+    public void testGetColumnTypes() {
         RecordSet recordSet = new ExampleRecordSet(new ExampleSplit(dataUri, null), ImmutableList.of(
                 new ExampleColumnHandle("text", createUnboundedVarcharType(), 0, false),
                 new ExampleColumnHandle("value", BIGINT, 1, false)));
@@ -63,8 +61,7 @@ public class TestExampleRecordSet
     }
 
     @Test
-    public void testCursorSimple()
-    {
+    public void testCursorSimple() {
         RecordSet recordSet = new ExampleRecordSet(new ExampleSplit(dataUri, null), ImmutableList.of(
                 new ExampleColumnHandle("text", createUnboundedVarcharType(), 0, false),
                 new ExampleColumnHandle("value", BIGINT, 1, false)));
@@ -87,8 +84,7 @@ public class TestExampleRecordSet
     }
 
     @Test
-    public void testCursorMixedOrder()
-    {
+    public void testCursorMixedOrder() {
         RecordSet recordSet = new ExampleRecordSet(new ExampleSplit(dataUri, null), ImmutableList.of(
                 new ExampleColumnHandle("value", BIGINT, 1, false),
                 new ExampleColumnHandle("value", BIGINT, 1, false),
@@ -116,15 +112,13 @@ public class TestExampleRecordSet
     //
 
     @BeforeAll
-    public void setUp()
-    {
+    public void setUp() {
         exampleHttpServer = new ExampleHttpServer(0);
         dataUri = exampleHttpServer.resolve("/example-data/numbers-2.csv").toString();
     }
 
     @AfterAll
-    public void tearDown()
-    {
+    public void tearDown() {
         if (exampleHttpServer != null) {
             exampleHttpServer.stop();
         }

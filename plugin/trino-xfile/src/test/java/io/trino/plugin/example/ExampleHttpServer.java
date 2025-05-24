@@ -31,13 +31,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 
-public class ExampleHttpServer
-{
+public class ExampleHttpServer {
     private final LifeCycleManager lifeCycleManager;
     private final URI baseUri;
 
-    public ExampleHttpServer(int port)
-    {
+    public ExampleHttpServer(int port) {
 
         Bootstrap app = new Bootstrap(
                 new TestingNodeModule(),
@@ -52,33 +50,27 @@ public class ExampleHttpServer
         baseUri = injector.getInstance(TestingHttpServer.class).getBaseUrl();
     }
 
-    public void stop()
-    {
+    public void stop() {
         lifeCycleManager.stop();
     }
 
-    public URI resolve(String s)
-    {
+    public URI resolve(String s) {
         return baseUri.resolve(s);
     }
 
     private static class ExampleHttpServerModule
-            implements Module
-    {
+            implements Module {
         @Override
-        public void configure(Binder binder)
-        {
+        public void configure(Binder binder) {
             binder.bind(Servlet.class).toInstance(new ExampleHttpServlet());
         }
     }
 
     private static class ExampleHttpServlet
-            extends HttpServlet
-    {
+            extends HttpServlet {
         @Override
         protected void doGet(HttpServletRequest request, HttpServletResponse response)
-                throws IOException
-        {
+                throws IOException {
             URL dataUrl = Resources.getResource(TestExampleClient.class, request.getPathInfo());
             Resources.asByteSource(dataUrl).copyTo(response.getOutputStream());
         }

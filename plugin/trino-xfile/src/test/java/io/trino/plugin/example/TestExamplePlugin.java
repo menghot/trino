@@ -2,10 +2,10 @@ package io.trino.plugin.example;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
+import io.airlift.log.Logger;
 import io.trino.plugin.base.util.Closables;
 import io.trino.testing.DistributedQueryRunner;
 import io.trino.testing.QueryRunner;
-import io.airlift.log.Logger;
 
 import java.net.URL;
 
@@ -33,8 +33,8 @@ public class TestExamplePlugin {
             try {
                 URL metadataUrl = Resources.getResource(TestExampleClient.class, "/example-data/example-metadata-http.json");
                 queryRunner.installPlugin(new ExamplePlugin());
-                queryRunner.createCatalog("example", "example_http",ImmutableMap.of("metadata-uri", metadataUrl.toURI().toString()));
-                queryRunner.createCatalog("example_simon", "example_http",ImmutableMap.of("metadata-uri", metadataUrl.toURI().toString()));
+                queryRunner.createCatalog("example", "example_http", ImmutableMap.of("metadata-uri", metadataUrl.toURI().toString()));
+                queryRunner.createCatalog("example_simon", "example_http", ImmutableMap.of("metadata-uri", metadataUrl.toURI().toString()));
             } catch (Throwable e) {
                 Closables.closeAllSuppress(e, queryRunner);
                 throw e;

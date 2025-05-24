@@ -19,22 +19,17 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.util.Map;
 
-import static io.airlift.configuration.testing.ConfigAssertions.assertFullMapping;
-import static io.airlift.configuration.testing.ConfigAssertions.assertRecordedDefaults;
-import static io.airlift.configuration.testing.ConfigAssertions.recordDefaults;
+import static io.airlift.configuration.testing.ConfigAssertions.*;
 
-public class TestExampleConfig
-{
+public class TestExampleConfig {
     @Test
-    public void testDefaults()
-    {
+    public void testDefaults() {
         assertRecordedDefaults(recordDefaults(ExampleConfig.class)
                 .setMetadata(null));
     }
 
     @Test
-    public void testExplicitPropertyMappings()
-    {
+    public void testExplicitPropertyMappings() {
         Map<String, String> properties = ImmutableMap.of("metadata-uri", "file://test.json");
 
         ExampleConfig expected = new ExampleConfig()

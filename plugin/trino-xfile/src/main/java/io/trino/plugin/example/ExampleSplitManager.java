@@ -16,9 +16,6 @@ package io.trino.plugin.example;
 import com.google.inject.Inject;
 import io.trino.spi.connector.*;
 
-import java.net.URI;
-import java.util.List;
-
 import static java.util.Objects.requireNonNull;
 
 public class ExampleSplitManager

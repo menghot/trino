@@ -24,23 +24,20 @@ import static io.trino.spi.type.BigintType.BIGINT;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TestExampleTable
-{
+public class TestExampleTable {
     private final ExampleTable exampleTable = new ExampleTable("tableName",
             ImmutableList.of(new ExampleColumn("a", createUnboundedVarcharType()), new ExampleColumn("b", BIGINT)),
             ImmutableList.of(URI.create("file://table-1.json"), URI.create("file://table-2.json")), null);
 
     @Test
-    public void testColumnMetadata()
-    {
+    public void testColumnMetadata() {
         assertThat(exampleTable.getColumnsMetadata()).isEqualTo(ImmutableList.of(
                 new ColumnMetadata("a", createUnboundedVarcharType()),
                 new ColumnMetadata("b", BIGINT)));
     }
 
     @Test
-    public void testRoundTrip()
-    {
+    public void testRoundTrip() {
         String json = TABLE_CODEC.toJson(exampleTable);
         ExampleTable exampleTableCopy = TABLE_CODEC.fromJson(json);
 

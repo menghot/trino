@@ -27,7 +27,6 @@ import java.io.UncheckedIOException;
 import java.util.OptionalLong;
 
 import static io.trino.plugin.base.util.Closables.closeAllSuppress;
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 public class ParquetPageSource
@@ -108,6 +107,6 @@ public class ParquetPageSource
         if (exception instanceof TrinoException trinoException) {
             return trinoException;
         }
-        return new TrinoException(() -> new ErrorCode(0,exception.getLocalizedMessage(), ErrorType.EXTERNAL), exception);
+        return new TrinoException(() -> new ErrorCode(0, exception.getLocalizedMessage(), ErrorType.EXTERNAL), exception);
     }
 }

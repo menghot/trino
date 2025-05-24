@@ -33,9 +33,9 @@ import static io.trino.spi.type.IntegerType.INTEGER;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static java.util.Locale.ENGLISH;
 
-public final class MetadataUtil
-{
-    private MetadataUtil() {}
+public final class MetadataUtil {
+    private MetadataUtil() {
+    }
 
     public static final JsonCodec<Map<String, List<ExampleTable>>> CATALOG_CODEC;
     public static final JsonCodec<ExampleTable> TABLE_CODEC;
@@ -51,8 +51,7 @@ public final class MetadataUtil
     }
 
     public static final class TestingTypeDeserializer
-            extends FromStringDeserializer<Type>
-    {
+            extends FromStringDeserializer<Type> {
         private final Map<String, Type> types = ImmutableMap.of(
                 StandardTypes.BOOLEAN, BOOLEAN,
                 StandardTypes.BIGINT, BIGINT,
@@ -60,14 +59,12 @@ public final class MetadataUtil
                 StandardTypes.DOUBLE, DOUBLE,
                 StandardTypes.VARCHAR, createUnboundedVarcharType());
 
-        public TestingTypeDeserializer()
-        {
+        public TestingTypeDeserializer() {
             super(Type.class);
         }
 
         @Override
-        protected Type _deserialize(String value, DeserializationContext context)
-        {
+        protected Type _deserialize(String value, DeserializationContext context) {
             Type type = types.get(value.toLowerCase(ENGLISH));
             if (type == null) {
                 throw new IllegalArgumentException(String.valueOf("Unknown type " + value));

@@ -17,11 +17,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 import io.trino.spi.TrinoException;
-import io.trino.spi.connector.ColumnMetadata;
-import io.trino.spi.connector.ConnectorTableMetadata;
-import io.trino.spi.connector.SaveMode;
-import io.trino.spi.connector.SchemaTableName;
-import io.trino.spi.connector.TableNotFoundException;
+import io.trino.spi.connector.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -38,15 +34,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
 
 @TestInstance(PER_METHOD)
-public class TestExampleMetadata
-{
+public class TestExampleMetadata {
     private static final ExampleTableHandle NUMBERS_TABLE_HANDLE = new ExampleTableHandle("example", "numbers");
     private ExampleMetadata metadata;
 
     @BeforeEach
     public void setUp()
-            throws Exception
-    {
+            throws Exception {
         URL metadataUrl = Resources.getResource(TestExampleClient.class, "/example-data/example-metadata.json");
         assertThat(metadataUrl)
                 .describedAs("metadataUrl is null")
@@ -56,14 +50,12 @@ public class TestExampleMetadata
     }
 
     @Test
-    public void testListSchemaNames()
-    {
+    public void testListSchemaNames() {
         assertThat(metadata.listSchemaNames(SESSION)).containsExactlyElementsOf(ImmutableSet.of("example", "tpch"));
     }
 
     @Test
-    public void testGetTableHandle()
-    {
+    public void testGetTableHandle() {
         assertThat(metadata.getTableHandle(SESSION, new SchemaTableName("example", "numbers"), Optional.empty(), Optional.empty())).isEqualTo(NUMBERS_TABLE_HANDLE);
         assertThat(metadata.getTableHandle(SESSION, new SchemaTableName("example", "unknown"), Optional.empty(), Optional.empty())).isNull();
         assertThat(metadata.getTableHandle(SESSION, new SchemaTableName("unknown", "numbers"), Optional.empty(), Optional.empty())).isNull();
@@ -71,8 +63,7 @@ public class TestExampleMetadata
     }
 
     @Test
-    public void testGetColumnHandles()
-    {
+    public void testGetColumnHandles() {
         // known table
 //        assertThat(metadata.getColumnHandles(SESSION, NUMBERS_TABLE_HANDLE)).isEqualTo(ImmutableMap.of(
 //                "text", new ExampleColumnHandle("text", createUnboundedVarcharType(), 0, false),
@@ -88,8 +79,7 @@ public class TestExampleMetadata
     }
 
     @Test
-    public void getTableMetadata()
-    {
+    public void getTableMetadata() {
         // known table
         ConnectorTableMetadata tableMetadata = metadata.getTableMetadata(SESSION, NUMBERS_TABLE_HANDLE);
         assertThat(tableMetadata.getTable()).isEqualTo(new SchemaTableName("example", "numbers"));
@@ -104,8 +94,7 @@ public class TestExampleMetadata
     }
 
     @Test
-    public void testListTables()
-    {
+    public void testListTables() {
         // all schemas
         assertThat(ImmutableSet.copyOf(metadata.listTables(SESSION, Optional.empty()))).isEqualTo(ImmutableSet.of(
                 new SchemaTableName("example", "numbers"),
@@ -124,8 +113,7 @@ public class TestExampleMetadata
     }
 
     @Test
-    public void getColumnMetadata()
-    {
+    public void getColumnMetadata() {
         assertThat(metadata.getColumnMetadata(SESSION, NUMBERS_TABLE_HANDLE, new ExampleColumnHandle("text", createUnboundedVarcharType(), 0, false))).isEqualTo(new ColumnMetadata("text", createUnboundedVarcharType()));
 
         // example connector assumes that the table handle and column handle are
@@ -136,8 +124,7 @@ public class TestExampleMetadata
     }
 
     @Test
-    public void testCreateTable()
-    {
+    public void testCreateTable() {
         assertThatThrownBy(() -> metadata.createTable(
                 SESSION,
                 new ConnectorTableMetadata(
@@ -149,8 +136,7 @@ public class TestExampleMetadata
     }
 
     @Test
-    public void testDropTableTable()
-    {
+    public void testDropTableTable() {
         assertThatThrownBy(() -> metadata.dropTable(SESSION, NUMBERS_TABLE_HANDLE))
                 .isInstanceOf(TrinoException.class);
     }

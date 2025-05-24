@@ -27,12 +27,12 @@ public final class ExampleTableHandle
         implements ConnectorTableHandle {
     private final String schemaName;
     private final String tableName;
+    private Map<String, Object> filterMap;
 
-    public void setConfigMap(Map<String, Object> configMap) {
-        this.configMap = configMap;
+    public void setFilterMap(Map<String, Object> filterMap) {
+        this.filterMap = filterMap;
     }
 
-    private Map<String,Object> configMap;
 
     @JsonCreator
     public ExampleTableHandle(
@@ -57,8 +57,8 @@ public final class ExampleTableHandle
     }
 
     @JsonProperty
-    public Map<String, Object> getConfigMap() {
-        return configMap;
+    public Map<String, Object> getFilterMap() {
+        return filterMap;
     }
 
     @Override

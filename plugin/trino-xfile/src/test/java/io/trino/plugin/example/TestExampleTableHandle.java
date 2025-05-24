@@ -23,13 +23,11 @@ import java.util.Map;
 import static io.airlift.json.JsonCodec.jsonCodec;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TestExampleTableHandle
-{
+public class TestExampleTableHandle {
     private final ExampleTableHandle tableHandle = new ExampleTableHandle("schemaName", "tableName");
 
     @Test
-    public void testJsonRoundTrip()
-    {
+    public void testJsonRoundTrip() {
         JsonCodec<ExampleTableHandle> codec = jsonCodec(ExampleTableHandle.class);
         String json = codec.toJson(tableHandle);
         ExampleTableHandle copy = codec.fromJson(json);
@@ -38,12 +36,11 @@ public class TestExampleTableHandle
 
 
     @Test
-    public void testJsonRoundTrip2()
-    {
+    public void testJsonRoundTrip2() {
         JsonCodec<ExampleTableHandle> codec = jsonCodec(ExampleTableHandle.class);
 
         ExampleTableHandle table = new ExampleTableHandle("schemaName", "tableName");
-        table.setConfigMap(Map.of("name","simon", "lists", List.of("p1","p2")));
+        table.setFilterMap(Map.of("name", "simon", "lists", List.of("p1", "p2")));
 
         String json = codec.toJson(table);
         System.out.println(json);
@@ -53,8 +50,7 @@ public class TestExampleTableHandle
     }
 
     @Test
-    public void testEquivalence()
-    {
+    public void testEquivalence() {
         EquivalenceTester.equivalenceTester()
                 .addEquivalentGroup(new ExampleTableHandle("schema", "table"), new ExampleTableHandle("schema", "table"))
                 .addEquivalentGroup(new ExampleTableHandle("schemaX", "table"), new ExampleTableHandle("schemaX", "table"))

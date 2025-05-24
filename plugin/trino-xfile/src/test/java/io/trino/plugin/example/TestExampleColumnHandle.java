@@ -21,21 +21,18 @@ import static io.trino.spi.type.BigintType.BIGINT;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TestExampleColumnHandle
-{
+public class TestExampleColumnHandle {
     private final ExampleColumnHandle columnHandle = new ExampleColumnHandle("columnName", createUnboundedVarcharType(), 0, false);
 
     @Test
-    public void testJsonRoundTrip()
-    {
+    public void testJsonRoundTrip() {
         String json = COLUMN_CODEC.toJson(columnHandle);
         ExampleColumnHandle copy = COLUMN_CODEC.fromJson(json);
         assertThat(copy).isEqualTo(columnHandle);
     }
 
     @Test
-    public void testEquivalence()
-    {
+    public void testEquivalence() {
         EquivalenceTester.equivalenceTester()
                 .addEquivalentGroup(
                         new ExampleColumnHandle("columnName", createUnboundedVarcharType(), 0, false),
