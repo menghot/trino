@@ -20,10 +20,13 @@ import com.google.common.io.CountingInputStream;
 import io.airlift.slice.Slice;
 import io.airlift.slice.Slices;
 import io.trino.spi.connector.RecordCursor;
+import io.trino.spi.type.DecimalType;
+import io.trino.spi.type.SqlDecimal;
 import io.trino.spi.type.Type;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
 
@@ -124,6 +127,10 @@ public class ExampleRecordCursor
 
     @Override
     public Object getObject(int field) {
+        Type actual = getType(field);
+        if (actual instanceof DecimalType decimalType) {
+            //return new SqlDecimal((BigInteger) field, decimalType.getPrecision(), decimalType.getScale());
+        }
         throw new UnsupportedOperationException();
     }
 

@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 import com.google.inject.Inject;
+import io.airlift.slice.Slice;
 import io.trino.filesystem.TrinoFileSystem;
 import io.trino.parquet.ParquetDataSource;
 import io.trino.parquet.ParquetReaderOptions;
@@ -27,6 +28,7 @@ import io.trino.parquet.reader.MetadataReader;
 import io.trino.plugin.example.parquet.ParquetFileDataSource;
 import io.trino.spi.TrinoException;
 import io.trino.spi.connector.*;
+import io.trino.spi.predicate.Domain;
 import io.trino.spi.type.Type;
 import io.trino.spi.type.VarcharType;
 import org.apache.parquet.io.MessageColumnIO;
@@ -38,6 +40,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import static io.trino.parquet.ParquetTypeUtils.getColumnIO;
 import static io.trino.plugin.example.parquet.ParquetTypeUtils.convertParquetTypeToTrino;
@@ -142,14 +145,28 @@ public class ExampleMetadata
 
         ExampleTableHandle exampleTableHandle = (ExampleTableHandle) handle;
 
-        exampleTableHandle.setFilterMap(Map.of("name", "simon", "lists", List.of("1", "2")));
-
-        if (constraint.predicate().isPresent()) {
-            System.out.println(constraint);
-        }
 
         if (constraint.getSummary().getDomains().isPresent()) {
-            constraint.getSummary().getDomains().get();
+            constraint.getSummary().getDomains().get().forEach((ch, domain) -> {
+                ExampleColumnHandle columnHandle = (ExampleColumnHandle) ch;
+                if (domain.isSingleValue()) {
+                    if (domain.getSingleValue() instanceof Slice s) {
+                        exampleTableHandle.getFilterMap().putIfAbsent(columnHandle.getColumnName(), s.toStringUtf8());
+
+                    }
+                } else {
+                    List<String> values = new ArrayList<>();
+                    domain.getValues().getRanges().getOrderedRanges().iterator().forEachRemaining(r -> {
+                        if (r.isSingleValue()) {
+                            if (r.getSingleValue() instanceof Slice s) {
+                                values.add(s.toStringUtf8());
+                            }
+                        }
+                        // more types support
+                    });
+                    exampleTableHandle.getFilterMap().putIfAbsent(columnHandle.getColumnName(), values);
+                }
+            });
         }
 
 

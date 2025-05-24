@@ -16,7 +16,11 @@ package io.trino.plugin.example;
 import com.google.inject.Inject;
 import io.airlift.bootstrap.LifeCycleManager;
 import io.trino.spi.connector.*;
+import io.trino.spi.session.PropertyMetadata;
 import io.trino.spi.transaction.IsolationLevel;
+
+import java.util.List;
+import java.util.Set;
 
 import static io.trino.plugin.example.ExampleTransactionHandle.INSTANCE;
 import static java.util.Objects.requireNonNull;
@@ -63,5 +67,10 @@ public class ExampleConnector
     @Override
     public final void shutdown() {
         lifeCycleManager.stop();
+    }
+
+    @Override
+    public List<PropertyMetadata<?>> getTableProperties() {
+        return new ExampleTableProperties().getTableProperties();
     }
 }

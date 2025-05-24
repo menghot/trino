@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.trino.spi.connector.ConnectorTableHandle;
 import io.trino.spi.connector.SchemaTableName;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -27,11 +28,7 @@ public final class ExampleTableHandle
         implements ConnectorTableHandle {
     private final String schemaName;
     private final String tableName;
-    private Map<String, Object> filterMap;
-
-    public void setFilterMap(Map<String, Object> filterMap) {
-        this.filterMap = filterMap;
-    }
+    private final Map<String, Object> filterMap = new HashMap<>();
 
 
     @JsonCreator

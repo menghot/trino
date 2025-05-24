@@ -40,7 +40,7 @@ public class TestExampleTableHandle {
         JsonCodec<ExampleTableHandle> codec = jsonCodec(ExampleTableHandle.class);
 
         ExampleTableHandle table = new ExampleTableHandle("schemaName", "tableName");
-        table.setFilterMap(Map.of("name", "simon", "lists", List.of("p1", "p2")));
+        table.getFilterMap().putAll(Map.of("name", "simon", "lists", List.of("p1", "p2")));
 
         String json = codec.toJson(table);
         System.out.println(json);
